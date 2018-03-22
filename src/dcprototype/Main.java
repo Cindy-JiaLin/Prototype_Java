@@ -76,13 +76,16 @@ public class Main
       { PrimCharDiff diff = new PrimCharDiff((PrimChar)resV1, (PrimChar)resV2);
         for(; !diff.refine(); );
       }
+      else if(resTYPE.isSTRING())
+      { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
+        for(; !diff.refine(); );
+      }
       else if(resTYPE.isNAT())
       { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
         for(; !diff.refine(); );
       }
-
-      else if(resTYPE.isSTRING())
-      { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
+      else if(resTYPE.isPRODUCT())
+      { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
         for(; !diff.refine(); );
       }
       else if(resTYPE.isLIST())
@@ -97,11 +100,6 @@ public class Main
   // model values with their TYPE
   public static TypeT model(TYPE T, TypeT t)
   { //model primitive types one by one
-    /*
-        else if(T.isREAL() && t.typeOf().isREAL())
-    { TypeReal v = (TypeReal)t;
-      return new TypeReal(T, v.getValue());
-    }  */
     if(T.isUNIT() && t.typeOf().isUNIT())
     { return new PrimUnit(T);
     }  
@@ -120,43 +118,46 @@ public class Main
     else if(T.isNAT() && t.typeOf().isNAT())
     { PrimNat v = (PrimNat)t;
       return new PrimNat(T, v.getValue());
+    }
+    else if(T.isINT() && t.typeOf().isINT())
+    { PrimInt v = (PrimInt)t;
+      return new PrimInt(T, v.getValue());
     }  
-    /*
+    else if(T.isREAL() && t.typeOf().isREAL())
+    { PrimReal v = (PrimReal)t;
+      return new PrimReal(T, v.getValue());
+    } 
     // model structured types one by one
     else if(T.isPRODUCT() && t.typeOf().isPRODUCT() && T.equals(t.typeOf()))
     { TypeProduct v =(TypeProduct)t;
-      return new TypeProduct(T, v.getValues());
+      return new TypeProduct(T, v.getLabels(), v.getValues());
     }   
     else if(T.isUNION() && t.typeOf().isUNION() && T.equals(t.typeOf()))
     { TypeUnion v = (TypeUnion)t;
       return new TypeUnion(T, v.getLabel(), v.getValue());
     }    
     else if(T.isREC() && TYPE.unfold(T).equals(t.typeOf()))
-    { return new TypeRec(T, t);
-    }    
-    */
+    { return new TypeRec(T, t);}    
     else if(T.isLIST() && t.typeOf().isLIST() && T.getBaseTYPE().equals(t.typeOf().getBaseTYPE()))
     { TypeList v = (TypeList) t;
       if(v.isEmptyList()) return new TypeList(T.getBaseTYPE());
       else{ return new TypeList(T.getBaseTYPE(), v.getValue());}
     }
-    /*    
     else if(T.isSET() && t.typeOf().isSET() && T.getBaseTYPE().equals(t.typeOf().getBaseTYPE()))
     { TypeSet v = (TypeSet) t;
       if(v.isEmptySet()) return new TypeSet(T.getBaseTYPE());
-      else{ return new TypeSet(T.getBaseTYPE(), v.getFst(), v.getRest());}
+      else{ return new TypeSet(T.getBaseTYPE(), v.getValue());}
     }    
     else if(T.isMSET() && t.typeOf().isMSET() && T.getBaseTYPE().equals(t.typeOf().getBaseTYPE()))
     { TypeMultiset v = (TypeMultiset)t;
       if(v.isEmptyMultiset()) return new TypeMultiset(T.getBaseTYPE());
-        else { return new TypeMultiset(T.getBaseTYPE(), v.getFst(), v.getRest());}
+        else { return new TypeMultiset(T.getBaseTYPE(), v.getValue());}
     }
     else if(T.isMAPPING() && t.typeOf().isMAPPING() && T.equals(t.typeOf()))
     { TypeMapping v = (TypeMapping)t;
-      if(v.isEmptyMapping()) return new TypeMapping(T);
-      else{ return new TypeMapping(T, v.getDomFst(), v.getCodFst(), v.getRest());}
-    } 
-    */   
+      if(v.isEmptyMapping()) return new TypeMapping(T.getDOM(), T.getCOD());
+      else{ return new TypeMapping(T.getDOM(), T.getCOD(), v.getDomFst(), v.getCodFst(), v.getRest());}
+    }  
     else { throw new RuntimeException("There is no other TYPE currently");}
   }        
 }

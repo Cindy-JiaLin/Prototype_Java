@@ -148,6 +148,16 @@ public class TYPE
     } 
     return true;
   }
+  public TYPE getTYPE(String label)//
+  { if(!this.labels.contains(label)) 
+      throw new RuntimeException("This label="+label+" is not existing.");
+    else
+    { int j=0;
+      for(int i=0; i<this.labels.size(); i++)
+        if(this.labels.get(i).equals(label)) { j=i; break;}
+      return this.TYPEs.get(j);
+    }
+  }
   // VAR TYPE
   // REC TYPE  
   // public final static TYPE REC(String varName, TYPE T){return new TYPE(sREC, varName, T);}
@@ -171,11 +181,11 @@ public class TYPE
   }
   //GET domain and codomain TYPE in MAPPING
   public TYPE getDOM()
-  { if(!isMAPPING()) return this.T1;
+  { if(isMAPPING()) return this.T1;
     else throw new RuntimeException(this+" is not a MAPPING TYPE.");
   }
   public TYPE getCOD()
-  { if(!isMAPPING()) return this.T2;
+  { if(isMAPPING()) return this.T2;
     else throw new RuntimeException(this+" is not a MAPPING TYPE.");
   }
  
@@ -274,9 +284,11 @@ public class TYPE
          if(this.TYPEs.get(i).contains(varName)) return true;
       return false;
     }
-    else if(isVAR()){ return (this.varName == null ? varName == null : this.varName.equals(varName));}
-           //When the VAR TYPE is contains in TYPE body.
-    else if(isREC()){ return (this.varName == null ? varName == null : this.varName.equals(varName))||this.T1.contains(varName);}
+    else if(isVAR())
+    { return (this.varName == null ? varName == null : this.varName.equals(varName));}
+    //When the VAR TYPE is contains in TYPE body.
+    else if(isREC())
+    { return (this.varName == null ? varName == null : this.varName.equals(varName))||this.T1.contains(varName);}
     else if(this.isLIST()||isSET()||this.isMSET()){ return this.T1.contains(varName);}
     else if(this.isMAPPING()){ return this.T1.contains(varName)&&this.T2.contains(varName);}
     else { throw new RuntimeException("There is no more TYPE at this stage, TYPE contains(varName).");}
@@ -313,20 +325,21 @@ public class TYPE
   // T is the REC TYPE
   // Target is the TYPE contains the varName 
   // This method is used to replace the varName in Target by T
-  public TYPE substitute(String varName, TYPE T, TYPE Target)
+  public static TYPE substitute(String varName, TYPE T, TYPE Target)
   { if(!Target.contains(varName)){return Target;}
-    else if(Target.isVAR()&&(Target.varName == null ? varName == null : Target.varName.equals(varName))){ return T;}
+    else if(Target.isVAR()&&(Target.varName == null ? varName == null : Target.varName.equals(varName)))
+    { return T;}
     else if(Target.isPRODUCT()) 
     { List<TYPE> newTYPEs=new ArrayList<TYPE>();
-      for(int i=0; i<Target.TYPEs.size(); i++)
-        newTYPEs.add(substitute(varName, T, Target.TYPEs.get(i)));
-      return PRODUCT(this.labels, newTYPEs);
+      for(int i=0; i<Target.getTYPEs().size(); i++)
+        newTYPEs.add(substitute(varName, T, Target.getTYPEs().get(i)));
+      return PRODUCT(Target.getLabels(), newTYPEs);
     }
     else if(Target.isUNION()) 
     { List<TYPE> newTYPEs=new ArrayList<TYPE>();
-      for(int i=0; i<Target.TYPEs.size(); i++)
+      for(int i=0; i<Target.getTYPEs().size(); i++)
         newTYPEs.add(substitute(varName, T, Target.TYPEs.get(i)));
-      return UNION(this.labels, newTYPEs);
+      return UNION(Target.getLabels(), newTYPEs);
     }
     else if(Target.isREC())
     { if(Target.varName == null ? varName == null : Target.varName.equals(varName)){ return Target; }
@@ -336,25 +349,25 @@ public class TYPE
     }
     else{ throw new RuntimeException("Currently, there is only these recursive constructor.");}    
   }        
-  public TYPE unfold(TYPE T)
+  public static TYPE unfold(TYPE T)
   { if(T.isVAR()||T.isPRIMITIVE()||T.isREAL()){ return T;}
     else if(T.isPRODUCT())
     { List<TYPE> newTYPEs=new ArrayList<TYPE>();
-      for(int i=0; i<this.TYPEs.size(); i++)
-        newTYPEs.add(unfold(this.TYPEs.get(i)));
-      return PRODUCT(this.labels, newTYPEs);
+      for(int i=0; i<T.getTYPEs().size(); i++)
+        newTYPEs.add(unfold(T.getTYPEs().get(i)));
+      return PRODUCT(T.getLabels(), newTYPEs);
     }
     else if(T.isUNION())
     { List<TYPE> newTYPEs=new ArrayList<TYPE>();
-      for(int i=0; i<this.TYPEs.size(); i++)
-        newTYPEs.add(unfold(this.TYPEs.get(i)));
-      return UNION(this.labels, newTYPEs);
+      for(int i=0; i<T.getTYPEs().size(); i++)
+        newTYPEs.add(unfold(T.getTYPEs().get(i)));
+      return UNION(T.getLabels(), newTYPEs);
     }
     else if(T.isREC()){ return substitute(T.varName, T, T.getBodyTYPE());}
     else if(T.isLIST()){ return LIST(unfold(T.getBaseTYPE()));}
     else if(T.isSET()){ return SET(unfold(T.getBaseTYPE()));}
     else if(T.isMSET()){ return MSET(unfold(T.getBaseTYPE()));}
-    else if(T.isMAPPING()){ return MAPPING(unfold(T1), unfold(T2));}
+    else if(T.isMAPPING()){ return MAPPING(unfold(T.getDOM()), unfold(T.getCOD()));}
     else { throw new RuntimeException("There is no other type at this stage.");}    
   } 
 }

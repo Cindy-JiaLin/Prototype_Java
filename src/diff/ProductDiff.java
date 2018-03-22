@@ -19,7 +19,8 @@ public class ProductDiff extends Diff
   
   public ProductDiff(TypeProduct a, TypeProduct b)
   { // These two product values must have the same size
-    if(a.size()!=b.size()) throw new RuntimeException("Different size Product values cannot be compared.");
+    if(a.size()!=b.size()) 
+       throw new RuntimeException("Different size Product values cannot be compared.");
     this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
@@ -153,6 +154,12 @@ public class ProductDiff extends Diff
       else if(t.isNAT()) 
       { op= new Change(new PrimNatDiff((PrimNat)ProductDiff.this.a.getValues().get(getIndex()), 
                                        (PrimNat)ProductDiff.this.b.getValues().get(getIndex())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
+      else if(t.isPRODUCT()) 
+      { op= new Change(new ProductDiff((TypeProduct)ProductDiff.this.a.getValues().get(getIndex()), 
+                                       (TypeProduct)ProductDiff.this.b.getValues().get(getIndex())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
@@ -358,35 +365,9 @@ public class ProductDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { if(resTYPE.isUNIT())
-      { PrimUnitDiff diff = new PrimUnitDiff((PrimUnit)resV1, (PrimUnit)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isBOOL())
-      { PrimBoolDiff diff = new PrimBoolDiff((PrimBool)resV1, (PrimBool)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isCHAR())
-      { PrimCharDiff diff = new PrimCharDiff((PrimChar)resV1, (PrimChar)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isSTRING())
-      { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isNAT())
-      { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isPRODUCT())
-      { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isLIST())
-      { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
-        for(; !diff.refine(); );
-      }
-    }  
+    { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
+      for(; !diff.refine(); );
+    }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
     System.out.println("duration:"+totalTime+"s");

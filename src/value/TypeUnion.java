@@ -17,7 +17,7 @@ public class TypeUnion extends TypeT
     this.T=T; this.label=label; this.value=value;
   }
   public String toString()
-  { return (value.typeOf().isUNIT()) ? this.label : this.label+this.value;}
+  { return (value.typeOf().isUNIT()) ? this.label : this.label+"."+this.value;}
   public boolean equals(Object obj)
   { if(obj instanceof TypeUnion)
     { TypeUnion that=(TypeUnion)obj;

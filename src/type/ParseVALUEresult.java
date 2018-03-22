@@ -105,7 +105,6 @@ public class ParseVALUEresult
     // value of a string needs a starting point and an ending point
     // but how to deal with sentence contains " mark ????
     // other characters like \',\",\\,\t,\b,\r,\n,\f
-    /*
     else if(T.isSTRING())
     {   if(!str.startsWith("\"")) 
           return error(str, "Expected a STRING TYPE value.");
@@ -123,7 +122,7 @@ public class ParseVALUEresult
           return error(str, "Expected a \" at the end of string value");
       str=cutoff(str,"\"");
         return ok(new PrimString(T, content), str);
-    }*/
+    }
     /* NAT */
     else if(T.isNAT())
     { if(str.startsWith("-")) 
@@ -234,9 +233,6 @@ public class ParseVALUEresult
             throw new RuntimeException("This value's TYPE="+value1res.typeOf()+
                                        "does not matching the first TYPE in "+T);
           str=value1.getRest().trim();
-        System.out.println("value1.getResult()="+value1.getResult());
-        System.out.println("value1.getRest()="+value1.getRest());
-     
           lols.add(label1);
           lots.add(value1res);
         }
@@ -337,7 +333,7 @@ public class ParseVALUEresult
       str=cutoff(str, label);
       if(str.startsWith("."))
       { str=cutoff(str, ".");
-        ParseVALUEresult t = parseVALUE(T, str);
+        ParseVALUEresult t = parseVALUE(T.getTYPE(label), str);
           if(t.getError()!=null) return t;
         str=t.getRest().trim();
         return ok(new TypeUnion(T, label, t.getResult()), str);
@@ -345,7 +341,7 @@ public class ParseVALUEresult
       return ok(new TypeUnion(T, label, new PrimUnit(TYPE.UNIT)), str);
     }
     /* REC */
-    else if(T.isREC()){ return parseVALUE(T.unfold(T), str);} // REC TYPE
+    else if(T.isREC()){ return parseVALUE(TYPE.unfold(T), str);} // REC TYPE
     /* LIST */
     else if(T.isLIST())
     { if(!str.startsWith("[")) 
@@ -431,7 +427,6 @@ public class ParseVALUEresult
         if(a1.getError()!=null) return a1;
       str=a1.getRest().trim();
       if(!str.startsWith("|->")) return error(str, "Expect a '|->' symbol between values.");
-
       str=cutoff(str, "|->");
       ParseVALUEresult b1=parseVALUE(T.getCOD(), str);
         if(b1.getError()!=null) return b1;
@@ -451,7 +446,7 @@ public class ParseVALUEresult
         ParseVALUEresult b=parseVALUE(T.getCOD(), str);
           if(b.getError()!=null) return b;
         str=b.getRest().trim();
-        mapping.ins(a.getResult(),b.getResult());
+        mapping=mapping.ins(a.getResult(),b.getResult());
       }
       str=cutoff(str, "]");
       return ok(mapping, str);

@@ -21,6 +21,7 @@ public class TypeList extends TypeT
       for(int i=0; i<this.lst.size(); i++)
       { buf.append(this.lst.get(i));
         if(i<this.lst.size()-1) buf.append(",");
+        if(this.lst.get(i).weight()>1) buf.append("\n");
       }
       buf.append("]");
       return buf.toString();

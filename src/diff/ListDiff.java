@@ -431,31 +431,9 @@ public class ListDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { if(resTYPE.isUNIT())
-      { PrimUnitDiff diff = new PrimUnitDiff((PrimUnit)resV1, (PrimUnit)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isBOOL())
-      { PrimBoolDiff diff = new PrimBoolDiff((PrimBool)resV1, (PrimBool)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isCHAR())
-      { PrimCharDiff diff = new PrimCharDiff((PrimChar)resV1, (PrimChar)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isSTRING())
-      { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isNAT())
-      { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
-        for(; !diff.refine(); );
-      }
-      else if(resTYPE.isLIST())
-      { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
-        for(; !diff.refine(); );
-      }
-    }  
+    { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
+      for(; !diff.refine(); );
+    }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
     System.out.println("duration:"+totalTime+"s");

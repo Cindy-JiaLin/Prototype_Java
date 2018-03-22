@@ -1,0 +1,3 @@
+# TYPE of A pair whose first component is of pair of natural number and second is a natural number
+
+{{Nat*Nat}*Nat}

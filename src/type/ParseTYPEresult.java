@@ -66,7 +66,7 @@ public class ParseTYPEresult
     { return ok(TYPE.BOOL, cutoff(str, "Bool"));} 
     else if(str.startsWith("Char"))
     { return ok(TYPE.CHAR, cutoff(str, "Char"));}
-     else if(str.startsWith("String"))
+    else if(str.startsWith("String"))
     { return ok(TYPE.STRING, cutoff(str, "String"));} 
     else if(str.startsWith("Nat"))
     { return ok(TYPE.NAT, cutoff(str, "Nat"));} 
@@ -247,10 +247,12 @@ public class ParseTYPEresult
       }
       for(int i=1; !str.startsWith("]"); i++)
       { str=cutoff(str, "|");
+          System.out.println("current str="+str);
         String label;
         int barIndex = str.indexOf("|");
         if(barIndex==-1)
         { int squareIndex = str.indexOf("]");
+          System.out.println("str="+str+" squareIndex="+squareIndex);
           if(squareIndex==-1) 
             throw new RuntimeException("Expected a correct form of UNION TYPE");
           int dotIndex=str.indexOf(".");
@@ -312,7 +314,6 @@ public class ParseTYPEresult
       //System.out.println("current str="+str);
       ParseTYPEresult unionBody=parseTYPE(varNames,str);
         if(unionBody.getError()!=null) return unionBody;
-      //System.out.println("unionBody="+unionBody.getResult());  
       str=unionBody.getRest().trim();
         if(!str.startsWith(")")) return error(str, "Expected a ')' at the end of REC TYPE");
       str=cutoff(str,")");

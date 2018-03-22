@@ -55,6 +55,9 @@ public class TypeMapping extends TypeT
 
   public TYPE getDomTYPE(){ return this.T1;}
   public TYPE getCodTYPE(){ return this.T2;}
+  public TypeT getDomFst(){ return this.a;}
+  public TypeT getCodFst(){ return this.b;}
+  public TypeMapping getRest(){ return this.rest;}
 
   public boolean contains(TypeT x, TypeT y)
   { if(isEmptyMapping()) return false;

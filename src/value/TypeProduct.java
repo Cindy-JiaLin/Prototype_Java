@@ -32,7 +32,7 @@ public class TypeProduct extends TypeT
     buf.append("(");
     for(int i=0; i<this.values.size(); i++)
     { if(!this.labels.get(i).equals(NOLABEL))
-      { buf.append(this.labels.get(i)); buf.append(".");}
+      { buf.append(this.labels.get(i)); buf.append("=");}
       buf.append(this.values.get(i));
       if(i<this.values.size()-1) buf.append(",");
     }
