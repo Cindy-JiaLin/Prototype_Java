@@ -1,0 +1,8 @@
+#List String
+
+["package diff",
+ "public abstract class Diff",
+ "{public abstract boolean isFinal();",
+ " public abstract boolean refine();",
+ "}"
+]

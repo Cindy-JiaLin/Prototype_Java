@@ -1,0 +1,2 @@
+# a)
+{length.Real(0.5)*width.Real(0.1)*height.Real}

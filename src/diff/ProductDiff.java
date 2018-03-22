@@ -13,17 +13,18 @@ import type.*;
 import value.*;
 import dcprototype.*;
 
-public class ListDiff extends Diff 
-{ private final TypeList a, b;
+public class ProductDiff extends Diff 
+{ private final TypeProduct a, b;
   private PartialSolution[] candidates;
   
-  public ListDiff(TypeList a, TypeList b)
-  { this.a=a; this.b=b;
+  public ProductDiff(TypeProduct a, TypeProduct b)
+  { // These two product values must have the same size
+    if(a.size()!=b.size()) throw new RuntimeException("Different size Product values cannot be compared.");
+    this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
   
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());} 
-
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}  
@@ -104,243 +105,170 @@ public class ListDiff extends Diff
   { private final Trace trace;
     private PartialSolution(Trace trace){ this.trace = trace;}
    
-    public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
-    public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
+    public int getIndex(){ return (this.trace == null ? 0 : trace.index);}
  
     public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
     public String html()
     { return HTML.TABLE(trace.html()+
       (SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
-    { return (trace == null ? Sim.UNKNOWN(ListDiff.this.a.weight()+
-                                          ListDiff.this.b.weight()) : trace.getSim());}
+    { return (trace == null ? Sim.UNKNOWN(ProductDiff.this.a.weight()+
+                                          ProductDiff.this.b.weight()) : trace.getSim());}
         
     public boolean refine(){ if(trace==null) return false; else return trace.refine();}        
-    
-    public PartialSolution delete()
-    { EditOperation op = new Delete(ListDiff.this.a.get(getSource()));
-      Trace trace = new Trace(this.trace, op);
-      return new PartialSolution(trace);
-    }        
-    public PartialSolution insert()
-    { EditOperation op = new Insert(ListDiff.this.b.get(getTarget()));
-      Trace trace = new Trace(this.trace, op);
-      return new PartialSolution(trace);
-    }        
+           
     public PartialSolution copy()
-    { EditOperation op = new Copy(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Copy(ProductDiff.this.a.getValues().get(getIndex()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }      
     public PartialSolution change()
     { EditOperation op;
       Trace trace;
-      TYPE baseTYPE = a.getBaseTYPE();
-      if(baseTYPE.isUNIT()) 
-      { op= new Change(new PrimUnitDiff((PrimUnit)ListDiff.this.a.get(getSource()), 
-                                        (PrimUnit)ListDiff.this.b.get(getTarget())));
+      TYPE t = a.typeOf().getTYPEs().get(getIndex());
+      if(t.isUNIT()) 
+      { op= new Change(new PrimUnitDiff((PrimUnit)ProductDiff.this.a.getValues().get(getIndex()), 
+                                        (PrimUnit)ProductDiff.this.b.getValues().get(getIndex())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isBOOL()) 
-      { op= new Change(new PrimBoolDiff((PrimBool)ListDiff.this.a.get(getSource()), 
-                                        (PrimBool)ListDiff.this.b.get(getTarget())));
+      else if(t.isBOOL()) 
+      { op= new Change(new PrimBoolDiff((PrimBool)ProductDiff.this.a.getValues().get(getIndex()), 
+                                        (PrimBool)ProductDiff.this.b.getValues().get(getIndex())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isCHAR()) 
-      { op= new Change(new PrimCharDiff((PrimChar)ListDiff.this.a.get(getSource()), 
-                                        (PrimChar)ListDiff.this.b.get(getTarget())));
+      else if(t.isCHAR()) 
+      { op= new Change(new PrimCharDiff((PrimChar)ProductDiff.this.a.getValues().get(getIndex()), 
+                                        (PrimChar)ProductDiff.this.b.getValues().get(getIndex())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isSTRING())
-      { op= new Change(new PrimStringDiff((PrimString)ListDiff.this.a.get(getSource()), 
-                                          (PrimString)ListDiff.this.b.get(getTarget())));
+      else if(t.isSTRING())
+      { op= new Change(new PrimStringDiff((PrimString)ProductDiff.this.a.getValues().get(getIndex()), 
+                                          (PrimString)ProductDiff.this.b.getValues().get(getIndex())));       
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isNAT()) 
-      { op= new Change(new PrimNatDiff((PrimNat)ListDiff.this.a.get(getSource()), 
-                                       (PrimNat)ListDiff.this.b.get(getTarget())));
+      else if(t.isNAT()) 
+      { op= new Change(new PrimNatDiff((PrimNat)ProductDiff.this.a.getValues().get(getIndex()), 
+                                       (PrimNat)ProductDiff.this.b.getValues().get(getIndex())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else//(baseTYPE.isLIST())
-      { op= new Change(new ListDiff((TypeList)ListDiff.this.a.get(getSource()), 
-                                    (TypeList)ListDiff.this.b.get(getTarget())));
+      else//(t.isLIST())
+      { op= new Change(new ListDiff((TypeList)ProductDiff.this.a.getValues().get(getIndex()), 
+                                    (TypeList)ProductDiff.this.b.getValues().get(getIndex())));        
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
     }        
     private PartialSolution[] expand()
-    { if(ListDiff.this.b.size() ==  getTarget())
-      { if(ListDiff.this.a.size() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete()};
-      }
-      else if(ListDiff.this.a.size() == getSource()) 
-             return new PartialSolution[]{ insert()};
-      // both are non-empty lists
-      else if(ListDiff.this.a.get(getSource()).equals(ListDiff.this.b.get(getTarget()))) 
+    { if(ProductDiff.this.a.size()==getIndex()) return new PartialSolution[0];// reach the end
+      else if(ProductDiff.this.a.getValues().get(getIndex()).equals(ProductDiff.this.b.getValues().get(getIndex()))) 
              return new PartialSolution[]{ copy()};
-      else if(ListDiff.this.a.get(getSource()).weight()==0) 
-             return new PartialSolution[]{ delete(), insert()};// delete an empty line 
-      else if(ListDiff.this.b.get(getTarget()).weight()==0) 
-             return new PartialSolution[]{ delete(), insert()};// insert an empty line
-      else return new PartialSolution[]{ change(), insert(), delete()};
+      else return new PartialSolution[]{ change()};
     }        
     
     // Get the last copy operation position
     public int getStopper(Trace trace)
     { if(trace == null) return -1;
-      else if(trace.op instanceof Copy) return trace.ia;
+      else if(trace.op instanceof Copy) return trace.index;
       else return getStopper(trace.trace);
     }  
-    // Get the last delete operation position
-    public int getLastDelete(Trace trace)
-    { if(trace == null) return -1;
-      else if(trace.op instanceof Copy) return -1;
-      else if(trace.op instanceof Delete) return trace.ia;
-      else return getLastDelete(trace.trace);
-    } 
-    // Get the last insert operation position
-    public int getLastInsert(Trace trace)
-    { if(trace == null) return -1;
-      else if(trace.op instanceof Copy) return -1;
-      else if(trace.op instanceof Insert) return trace.ib;
-      else return getLastInsert(trace.trace);
-    }
     public boolean isRedundant(PartialSolution[] active) 
     { int stopper = getStopper(this.trace);
-      int lastDelete = getLastDelete(this.trace);
-      int lastInsert = getLastInsert(this.trace);
       for(int i = 0; i < active.length; i++)
       { Trace t = active[i].trace;
-        if(stopper == getStopper(t) && 
-           lastDelete == getLastDelete(t) && 
-           lastInsert == getLastInsert(t))
-          return true;
+        if(stopper == getStopper(t)) return true;
       }    
       return false;
     }      
   } 
   // a trace is a (reverse) List of Edit Operations appplied to a specific position
+  // Each element in a has the corresponding matching components in b at the position index
   private class Trace
   { private final Trace trace;
-    private final int ia, ib;
+    private final int index;
     private final EditOperation op;
     private Sim sim;
     
     public Trace(Trace trace, EditOperation op)
     { this.trace = trace;
       this.op = op;
-      this.ia = op.nextA(trace == null ? 0 : trace.ia);
-      this.ib = op.nextB(trace == null ? 0 : trace.ib);
-      this.sim = op.calculate(trace == null ? ListDiff.this.getUnknown() :  trace.getSim());
+      this.index = op.next(trace == null ? 0 : trace.index);
+      this.sim = op.calculate(trace == null ? ProductDiff.this.getUnknown() :  trace.getSim());
     }        
     public String toString()
     { return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
     public String html()
-    { return(this.trace != null ? this.trace.html() : "")+HTML.TR(op.html(ia,ib));}
+    { return(this.trace != null ? this.trace.html() : "")+HTML.TR(op.html(index));}
     public Sim getSim(){ return this.sim;}
 
     public boolean refine()
     { if(this.op.refine()) return true;
-      this.sim=this.op.calculate(trace==null ? ListDiff.this.getUnknown() : trace.getSim());
+      this.sim=this.op.calculate(trace==null ? ProductDiff.this.getUnknown() : trace.getSim());
       return false;
     }
   }
  
   private abstract static class EditOperation
-  { abstract String html(int ia, int ib);
+  { abstract String html(int index);
     abstract Sim calculate(Sim sim);
     abstract boolean refine();// return true if there was a refinement possible, false otherwise
-    abstract int nextA(int ia);// return the position of the element in a after a specific edit EditOperation
-    abstract int nextB(int ib);// return the position of the element in b after a specific edit EditOperation
-  }
-  private final static class Insert extends EditOperation
-  { private final TypeT c;
-    public Insert(TypeT c){ this.c=c;}
-    public String toString(){ return "+"+c;}
-    public String html(int ia, int ib)
-    { return HTML.TD("")+
-             HTML.TD(HTML.INS,ib)+
-      (SIM ? HTML.TD("") : "")+
-             HTML.TD(HTML.INS, HTML.encode(c.toString()));}
-
-    public Sim calculate(Sim sim){ return sim.dec(c.weight());}
-    public boolean refine(){ return true;}
-    public int nextA(int ia){ return ia;}
-    public int nextB(int ib){ return ib+1;}
-  }
-  private final static class Delete extends EditOperation
-  { private final TypeT c;
-    public Delete(TypeT c){ this.c=c;}
-    public String toString(){ return "-"+c;}
-    public String html(int ia, int ib)
-    { return HTML.TD("")+
-             HTML.TD(HTML.DEL,ia)+
-      (SIM ? HTML.TD("") : "")+
-             HTML.TD(HTML.DEL, HTML.encode(c.toString()));}
-
-    public Sim calculate(Sim sim){ return sim.dec(c.weight());}
-    public boolean refine(){ return true;}
-    public int nextA(int ia){ return ia+1;}
-    public int nextB(int ib){ return ib;}
+    abstract int next(int index);
+    // return the position of the element in a after a specific edit EditOperation
   }
   private final static class Copy extends EditOperation
   { private final TypeT c;
     public Copy(TypeT c){ this.c=c;}
     public String toString(){ return "="+c;}
-    public String html(int ia, int ib)
-    { return HTML.TD(HTML.CPY,ia)+
-             HTML.TD(HTML.CPY,ib)+
+    public String html(int index)
+    { return HTML.TD(HTML.CPY,index)+
       (SIM ? HTML.TD("") : "")+
              HTML.TD(HTML.CPY, HTML.encode(c.toString()));}
 
     public Sim calculate(Sim sim){ return sim.inc(2*c.weight());}
     public boolean refine(){ return true;}
-    public int nextA(int ia){ return ia+1;}
-    public int nextB(int ib){ return ib+1;}
+    public int next(int index){ return index+1;}
   }
   private final static class Change extends EditOperation
   { private final Diff diff;
     public Change(Diff diff){ this.diff=diff;}
     public String toString(){ return "!"+diff;}
-    public String html(int ia, int ib)
+    public String html(int index)
     { if(diff instanceof PrimUnitDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
+      { return HTML.TD(HTML.CHG,index)+
         (SIM ? HTML.TD(""+((PrimUnitDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimUnitDiff)diff).html());
       }
       else if(diff instanceof PrimBoolDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
+      { return HTML.TD(HTML.CHG,index)+
         (SIM ? HTML.TD(""+((PrimBoolDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimBoolDiff)diff).html());
       }
       else if(diff instanceof PrimCharDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
+      { return HTML.TD(HTML.CHG,index)+
         (SIM ? HTML.TD(""+((PrimCharDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimCharDiff)diff).html());
       }
       else if(diff instanceof PrimStringDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
+      { return HTML.TD(HTML.CHG,index)+
         (SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimStringDiff)diff).html());
       }
       else if(diff instanceof PrimNatDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
+      { return HTML.TD(HTML.CHG,index)+
         (SIM ? HTML.TD(""+((PrimNatDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimNatDiff)diff).html());
       }
+      else if(diff instanceof ProductDiff)
+      { return HTML.TD(HTML.CHG,index)+
+        (SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD(HTML.CHG, ((ProductDiff)diff).html());
+      }
       else if(diff instanceof ListDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
+      { return HTML.TD(HTML.CHG,index)+
         (SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ListDiff)diff).html());
       }
@@ -350,8 +278,7 @@ public class ListDiff extends Diff
     public Sim calculate(Sim sim)
     { return sim.inc(this.diff.getSim().getIncrement()).dec(this.diff.getSim().getDecrement());}
     public boolean refine(){ return diff.refine();}
-    public int nextA(int ia){ return ia+1;}
-    public int nextB(int ib){ return ib+1;}
+    public int next(int index){ return index+1;}
   }
 
   public static boolean VERBOSE = false;// if true all intermediate states will be logged
@@ -449,6 +376,10 @@ public class ListDiff extends Diff
       }
       else if(resTYPE.isNAT())
       { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
+        for(; !diff.refine(); );
+      }
+      else if(resTYPE.isPRODUCT())
+      { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
         for(; !diff.refine(); );
       }
       else if(resTYPE.isLIST())

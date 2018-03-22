@@ -1,0 +1,3 @@
+# e)
+
+rec(nat:[zero|succ.nat])

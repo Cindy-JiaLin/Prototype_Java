@@ -68,7 +68,8 @@ public class Options
     try
     { BufferedReader in = new BufferedReader(new FileReader(new File(filePathName)));
       for(String line=in.readLine(); line!=null; line=in.readLine())
-        buf.append(line).append("\n");
+        if(line.startsWith("#")) System.out.println(line);
+        else buf.append(line).append("\n");
       in.close();
     }    
     catch(IOException e){}
@@ -79,7 +80,8 @@ public class Options
     try
     { BufferedReader in = new BufferedReader(new FileReader(new File(filePathName)));
       for(String line = in.readLine(); line!=null; line=in.readLine())
-        lines.add(line);
+        if(line.startsWith("#")) System.out.println(line);
+        else lines.add(line);
       in.close();
     }
     catch(IOException e){}

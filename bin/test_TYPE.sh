@@ -1,0 +1,14 @@
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/a.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/b.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/c.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/d.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/e.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/f.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/g.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/h.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/i.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/j.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/k.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/l.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/m.TYPE 
+java -cp lib dcprototype.Main -type testTYPE/_TYPE_Example_In_B/n.TYPE 

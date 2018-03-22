@@ -8,8 +8,10 @@ import type.TYPE;
 public class TypeList extends TypeT
 { private final TYPE baseTYPE;
   private final List<TypeT> lst;
-  public TypeList(TYPE baseTYPE){ this.baseTYPE=baseTYPE; this.lst = new ArrayList();}
-  public TypeList(TYPE baseTYPE, List<TypeT> lst){ this.baseTYPE = baseTYPE; this.lst = lst;}
+  public TypeList(TYPE baseTYPE)
+  { this.baseTYPE=baseTYPE; this.lst = new ArrayList();}
+  public TypeList(TYPE baseTYPE, List<TypeT> lst)
+  { this.baseTYPE = baseTYPE; this.lst = lst;}
   
   public String toString()
   { if(this.lst.isEmpty()) return "[]";
@@ -24,7 +26,14 @@ public class TypeList extends TypeT
       return buf.toString();
     }
   }
-  public boolean equals(Object obj){ return this.lst.equals(obj);}
+  public boolean equals(Object obj)
+  { if(obj instanceof TypeList)
+    { TypeList that=(TypeList)obj;
+      return this.baseTYPE.equals(that.baseTYPE)&&
+             this.lst.equals(that.lst);
+    }
+    else throw new RuntimeException("This obj="+obj+" is not an instance of TypeList."); 
+  }
   
   public TYPE getBaseTYPE(){ return this.baseTYPE;}
   public List<TypeT> getValue(){ return this.lst;}
@@ -33,7 +42,7 @@ public class TypeList extends TypeT
   public boolean isEmptyList(){ return this.lst.isEmpty();}
 
   public TYPE typeOf(){ return TYPE.LIST(this.baseTYPE);} 
-    public int weight()
+  public int weight()
   { int w = 0;
     if(this.lst.isEmpty()) return 0;
     else 

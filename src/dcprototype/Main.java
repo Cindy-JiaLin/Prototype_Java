@@ -3,6 +3,9 @@ package dcprototype;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import type.*;
 import value.*;
 import diff.*;
@@ -35,7 +38,8 @@ public class Main
     }
     else strTYPE = Options.getFileContentsAsString(typeFileName);
     //System.out.println("strTYPE: "+strTYPE);
-    TYPE resTYPE=ParseTYPEresult.parseTYPE(new ListOfVars(), strTYPE).getResult();//parse TYPE
+    List<String> lovs = new ArrayList<String>();
+    TYPE resTYPE=ParseTYPEresult.parseTYPE(lovs, strTYPE).getResult();//parse TYPE
     System.out.println("resTYPE: "+resTYPE);
 
     String source = null;

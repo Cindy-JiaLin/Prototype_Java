@@ -73,6 +73,70 @@ public class ParseVALUEresult
     return buf.toString();
   } 
 
+  // inner class
+  private class ProductComps
+  { private final List<String> lols;
+    private final List<TypeT> lots;
+    private final String restStr;
+    ProductComps(List<String> lols, List<TypeT> lots, String restStr)
+    { this.lols=lols; this.lots=lots; this.restStr=restStr;} 
+    private List<String> getLols(){ return this.lols;}
+    private List<TypeT> getLots(){ return this.lots;}
+    private String getStr(){ return this.restStr;}
+    /*
+    parameters
+    int i : the position of the label and type in the product value
+    String typeLabel : the origial label at the position i
+    String label : the label read from the str
+    TYPE type : the original type at the position i
+    String str : the str ready for parsing
+    List<String> lols : list of labels
+    List<TypeT> lots : list of values
+    */
+    private ProductComps parseOneComp(int i, String typeLabel, String label, TYPE type, String str, List<String> lols, List<TypeT> lots)
+    { if(!typeLabel.equals(label)) 
+        throw new RuntimeException("This label="+label+
+                                   "does not matching the label "+(i+1));
+      ParseVALUEresult value=parseVALUE(type, str);
+      if(value.getError()!=null)
+        throw new RuntimeException("Error:"+value.getError());
+      TypeT valueRes = value.getResult();
+      if(!type.equals(valueRes.typeOf()))
+        throw new RuntimeException("This value's TYPE="+valueRes.typeOf()+
+                                   "does not matching the TYPE "+(i+1));
+      str=value.getRest().trim();
+      lols.add(label);
+      lots.add(valueRes);
+      return new ProductComps(lols, lots, str);
+    }
+  
+    private ProductComps determineLabel(String strSegment, int i, String typeLabel, String label, TYPE type, String str, List<String> lols, List<TypeT> lots)
+    { int eqIndex = strSegment.indexOf("=");
+      if(eqIndex==-1)// this value has no label
+      { return parseOneComp(i, typeLabel, NOLABEL, type, str, lols, lots);}
+      else// this value has label
+      { label = str.substring(0, eqIndex);
+        str=cutoff(str, label);
+        str=cutoff(str, "=");
+        return parseOneComp(i, typeLabel, label, type, str, lols, lots);
+      }
+    } 
+    private ProductComps getOneComp(int i, String typeLabel, TYPE type, String str, List<String> lols, List<TypeT> lots)
+    { String label="";
+      int commaIndex=str.indexOf(",");
+      if(commaIndex==-1)// this product value only has one component
+      { int endIndex=str.indexOf(")");
+        if(endIndex==-1) 
+          throw new RuntimeException("Please provide product values with ')' at the end");
+        String strBeforeEnd=str.substring(0, endIndex);
+        return determineLabel(strBeforeEnd, i, typeLabel, label, type, str, lols, lots);
+      }
+      else// this PRODUCT value has more than one components
+      { String strBeforeComma=str.substring(0, commaIndex);
+        return determineLabel(strBeforeComma, i, typeLabel, label, type, str, lols, lots);
+      }
+    }
+  }
   private static String NOLABEL="nolabel";
    
   public static ParseVALUEresult parseVALUE(TYPE T, String str)
@@ -162,8 +226,14 @@ public class ParseVALUEresult
       str=cutoff(str,"(");
       List<String> lols = new ArrayList<>();
       List<TypeT> lots = new ArrayList<>();
-      String label1;
+      //String label1;
+      String typeLabel=T.getLabels().get(0);
       TYPE type1=T.getTYPEs().get(0);
+      ProductComps comps = getOneComp(0, typeLabel, type1, str, lols, lots);
+      str=comps.getStr();
+      lols=comps.getLols();
+      lots=comps.getLots();
+      /*
       int commaIndex1=str.indexOf(",");
       if(commaIndex1==-1)// this product value only has one component
       { int endIndex1=str.indexOf(")");
@@ -240,11 +310,17 @@ public class ParseVALUEresult
           lols.add(label1);
           lots.add(value1res);
         }
-      }
+      }*/
       for(int i=1; !str.startsWith(")"); i++)
       { str=cutoff(str, ",");
-        String label;
+        //String label;
+        String typeLabel=T.getLabels().get(i);
         TYPE type = T.getTYPEs().get(i);
+        ProductComps comps = getOneComp(i, typeLabel, type, str, lols, lots);
+        str=comps.getStr();
+        lols=comps.getLols();
+        lots=comps.getLots();
+        /*
         int commaIndex=str.indexOf(",");
         if(commaIndex==-1)
         { int endIndex=str.indexOf(")");
@@ -318,7 +394,7 @@ public class ParseVALUEresult
             lols.add(label);
             lots.add(valueRes);
           }
-        }
+        }*/
       }
       str=cutoff(str, ")");
       return ok(new TypeProduct(T, lols, lots), str);

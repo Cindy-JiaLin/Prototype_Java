@@ -1,0 +1,3 @@
+# d)
+
+{name.String*age.Nat*marriage.[single.Bool|married.Bool|separated.Bool|divorced.Bool|widowed.Bool]*address.String}
