@@ -1,0 +1,14 @@
+Suppose the type system only contains PrimChar, PrimString and TypeList
+
+(1) diff_Strings.sh compares two strings “survey” and “surgery”
+    diff_Lists_Chars.sh compares two lists of chars [s,u,r,v,e,y] and [s,u,r,g,e,r,y]
+    both are working and have the same result.
+
+(2) diff_lists_Strings.sh works well, but the following problems need to be fixed.
+
+Existing problems of this version:
+Problem 1: HTML method for writing TypeT values to html, e.g. encode(TypeT t)
+Problem 2: Return null, when parsing the file testVALUE/lists_strings/constructed_source14.java. But the constructed_target14.java has no problem. Don’t know the reason yet.
+
+
+

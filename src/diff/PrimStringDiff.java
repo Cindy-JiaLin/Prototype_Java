@@ -1,8 +1,8 @@
 package diff;
 
 import sim.Sim;
-import main.HTML;
-import main.Main;
+import dcprototype.HTML;
+import dcprototype.Main;
 
 import type.TYPE;
 import value.PrimString;
@@ -17,7 +17,7 @@ public class PrimStringDiff extends Diff
   }        
  
   public String toString(){ return this.candidates[0].toString();}
-  //public String html(){ return this.candidates[0].html();}
+  public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}       
   
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
@@ -82,7 +82,7 @@ public class PrimStringDiff extends Diff
  
     public String toString()
     { return "["+(trace == null ? "" : trace.toString())+"?"+PrimStringDiff.this.a.substring(getSource())+"?"+PrimStringDiff.this.b.substring(getTarget())+"]"+getSim();}  
-    //public String html(){ return (trace == null ? "" : trace.html());}
+    public String html(){ return (trace == null ? "" : trace.html());}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(PrimStringDiff.this.a.weight()+PrimStringDiff.this.b.weight()) : trace.getSim());}
 
@@ -163,12 +163,12 @@ public class PrimStringDiff extends Diff
       this.sim = op.calculate(trace == null ? PrimStringDiff.this.getUnknown() :  trace.getSim());
     }        
     public String toString(){ return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
-    //public String html(){ return(this.trace == null ? "" : this.trace.html())+this.op.html();}
+    public String html(){ return(this.trace == null ? "" : this.trace.html())+this.op.html();}
     public Sim getSim(){ return this.sim;}
   }
  
   private abstract static class EditOperation
-  { //abstract String html();
+  { abstract String html();
 
     abstract Sim calculate(Sim sim);
     abstract int nextA(int ia);// return the position of the character in string a after a specific edit EditOperation
@@ -178,7 +178,7 @@ public class PrimStringDiff extends Diff
   { private final char c;
     public Insert(char c){ this.c=c;}
     public String toString(){ return "+"+c;}
-    //public String html(){ return HTML.INS(c);}
+    public String html(){ return HTML.INS(c);}
 
     public Sim calculate(Sim sim){ return sim.dec(1);}
     public int nextA(int ia){ return ia;}
@@ -188,7 +188,7 @@ public class PrimStringDiff extends Diff
   { private final char c;
     public Delete(char c){ this.c=c;}
     public String toString(){ return "-"+c;}
-    //public String html(){ return HTML.DEL(c);}
+    public String html(){ return HTML.DEL(c);}
 
     public Sim calculate(Sim sim){ return sim.dec(1);}
     public int nextA(int ia){ return ia+1;}
@@ -198,7 +198,7 @@ public class PrimStringDiff extends Diff
   { private final char c;
     public Copy(char c){ this.c=c;}
     public String toString(){ return "="+c;}
-    //public String html(){ return HTML.encode(c);}
+    public String html(){ return HTML.encode(c);}
 
     public Sim calculate(Sim sim){ return sim.inc(2);}
     public int nextA(int ia){ return ia+1;}

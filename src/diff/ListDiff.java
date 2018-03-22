@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import sim.Sim;
-import main.HTML;
-import main.Options;
+import dcprototype.HTML;
+import dcprototype.Options;
 
 import type.TYPE;
 
@@ -17,7 +17,7 @@ import value.PrimChar;
 import value.PrimString;
 import value.TypeList;
 
-import main.Main;
+import dcprototype.Main;
 
 public class ListDiff extends Diff 
 { private final TypeList a, b;
@@ -60,7 +60,7 @@ public class ListDiff extends Diff
     else if (isFinal())
     { if(!Main.VERBOSE && Main.DIFF) 
       System.out.println(this.candidates[0]);
-      //if(HTMLCODE) writeHTML(this.candidates[0]);
+      //if(Main.HTMLCODE) writeHTML(this.candidates[0]);
       if(Main.SIM) 
       System.out.println(this.candidates[0].getSim().getPercentage());
       return true;
@@ -70,7 +70,20 @@ public class ListDiff extends Diff
       Arrays.sort(this.candidates, simComparator);
       return false;
     }
-  }  
+  }
+  /*
+  private static String htmlFileName;
+  private static void writeHTML(PartialSolution solution)
+  { if(htmlFileName!=null)
+    try
+    { FileWriter out = new FileWriter(htmlFileName);
+      out.write(HTML.BODY(solution.html()));
+      out.flush();
+      out.close();
+    }  
+    catch(IOException e){ System.err.println("Promblem writing to:"+htmlFileName);}
+  } 
+  */     
   private final static SimComparator simComparator = new SimComparator();
   private static class SimComparator implements Comparator<PartialSolution>
   { public int compare(PartialSolution sol1, PartialSolution sol2)
@@ -114,7 +127,7 @@ public class ListDiff extends Diff
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
  
     public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
-    //public String html(){ return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    //public String html(){ return HTML.TABLE(trace.html()+(Main.SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim(){ return (trace == null ? Sim.UNKNOWN(ListDiff.this.a.size()+ListDiff.this.b.size()) : trace.getSim());}
         
     public boolean refine(){ if(trace==null) return false; else return trace.refine();}        
@@ -239,7 +252,7 @@ public class ListDiff extends Diff
     public Insert(TypeT c){ this.c=c;}
     public String toString(){ return "+"+c;}
     //public String html(int ia, int ib)
-    //{ return HTML.TD("")+HTML.TD(HTML.INS,ib)+(SIM ? HTML.TD("") : "")+HTML.TD(HTML.INS, HTML.encode(c));}
+    //{ return HTML.TD("")+HTML.TD(HTML.INS,ib)+(Main.SIM ? HTML.TD("") : "")+HTML.TD(HTML.INS, HTML.encode(c.toString()));}
 
     public Sim calculate(Sim sim){ return sim.dec(c.weight());}
     public boolean refine(){ return true;}
@@ -251,7 +264,7 @@ public class ListDiff extends Diff
     public Delete(TypeT c){ this.c=c;}
     public String toString(){ return "-"+c;}
     //public String html(int ia, int ib)
-    //{ return HTML.TD("")+HTML.TD(HTML.DEL,ia)+(SIM ? HTML.TD("") : "")+HTML.TD(HTML.DEL, HTML.encode(c));}
+    //{ return HTML.TD("")+HTML.TD(HTML.DEL,ia)+(Main.SIM ? HTML.TD("") : "")+HTML.TD(HTML.DEL, HTML.encode(c.toString()));}
 
     public Sim calculate(Sim sim){ return sim.dec(c.weight());}
     public boolean refine(){ return true;}
@@ -263,7 +276,7 @@ public class ListDiff extends Diff
     public Copy(TypeT c){ this.c=c;}
     public String toString(){ return "="+c;}
     //public String html(int ia, int ib)
-    //{ return HTML.TD(HTML.CPY,ia)+HTML.TD(HTML.CPY,ib)+(SIM ? HTML.TD("") : "")+HTML.TD(HTML.CPY, HTML.encode(c));}
+    //{ return HTML.TD(HTML.CPY,ia)+HTML.TD(HTML.CPY,ib)+(Main.SIM ? HTML.TD("") : "")+HTML.TD(HTML.CPY, HTML.encode(c.toString()));}
 
     public Sim calculate(Sim sim){ return sim.inc(2*c.weight());}
     public boolean refine(){ return true;}
@@ -274,8 +287,19 @@ public class ListDiff extends Diff
   { private final Diff diff;
     public Change(Diff diff){ this.diff=diff;}
     public String toString(){ return "!"+diff;}
-    //public String html(int ia, int ib)
-    //{ return HTML.TD(HTML.CHG,ia)+HTML.TD(HTML.CHG,ib)+(SIM ? HTML.TD(""+diff.getSim().getPercentage1()+" ") : "")+HTML.TD(HTML.CHG, diff.html());}
+    /*
+    public String html(int ia, int ib)
+    { if(diff instanceof PrimCharDiff)
+      { return HTML.TD(HTML.CHG,ia)+HTML.TD(HTML.CHG,ib)+(Main.SIM ? HTML.TD(""+diff.getSim().getPercentage1()+" ") : "")+HTML.TD(HTML.CHG, (PrimCharDiff)diff.html());
+      }
+      else if(diff instanceof PrimStringDiff)
+      { return HTML.TD(HTML.CHG,ia)+HTML.TD(HTML.CHG,ib)+(Main.SIM ? HTML.TD(""+diff.getSim().getPercentage1()+" ") : "")+HTML.TD(HTML.CHG, (PrimStringDiff)diff.html());
+      }
+      else if(diff instanceof ListDiff)
+      { return HTML.TD(HTML.CHG,ia)+HTML.TD(HTML.CHG,ib)+(Main.SIM ? HTML.TD(""+diff.getSim().getPercentage1()+" ") : "")+HTML.TD(HTML.CHG, (ListDiff)diff.html());
+      }
+    }
+    */
 
     public Sim calculate(Sim sim)
     { return sim.inc(this.diff.getSim().getIncrement()).dec(this.diff.getSim().getDecrement());}
