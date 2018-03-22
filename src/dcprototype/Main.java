@@ -12,7 +12,6 @@ public class Main
   public static boolean SIM = false;// displays similarity as percentage
   public static boolean DIFF = false;// displays difference as a solution (PartialSolution) 
   public static boolean INFO = false;// displays runtime statistics
-  public static boolean HTMLCODE=false;// displays difference as text
     
   public static void main(String[] args) 
   { final long startTime = System.currentTimeMillis();
@@ -20,9 +19,6 @@ public class Main
     if(Options.isSet(args, "-sim")) { SIM = true; args = Options.remove(args, "-sim");}
     if(Options.isSet(args, "-diff")) { DIFF = true; args = Options.remove(args, "-diff");}
     
-    String htmlFileName=Options.getOption(args, "-html");
-    if(htmlFileName!=null){ HTMLCODE=true; args=Options.remove(args,"-html", htmlFileName);}
- 
     String typeFileName=Options.getOption(args, "-type");//get the arg after the -type
     if(typeFileName!=null) args = Options.remove(args, "-type", typeFileName);
 
@@ -76,6 +72,11 @@ public class Main
       { PrimCharDiff diff = new PrimCharDiff((PrimChar)resV1, (PrimChar)resV2);
         for(; !diff.refine(); );
       }
+      else if(resTYPE.isNAT())
+      { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
+        for(; !diff.refine(); );
+      }
+
       else if(resTYPE.isSTRING())
       { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
         for(; !diff.refine(); );
@@ -90,27 +91,21 @@ public class Main
     System.out.println("duration:"+totalTime+"s");
   }  
   // model values with their TYPE
-  private static TypeT model(TYPE T, TypeT t)
+  public static TypeT model(TYPE T, TypeT t)
   { //model primitive types one by one
     /*
-    if(T.isUNIT() && t.typeOf().isUNIT())
-    { return new TypeUnit(T);
-    }  
-    else if(T.isBOOL() && t.typeOf().isBOOL()) 
-    { TypeBool v = (TypeBool)t;
-      return new TypeBool(T, v.getValue());
-    }
-    else if(T.isREAL() && t.typeOf().isREAL())
+        else if(T.isREAL() && t.typeOf().isREAL())
     { TypeReal v = (TypeReal)t;
       return new TypeReal(T, v.getValue());
-    }    
-    else if(T.isNAT() && t.typeOf().isNAT())
-    { TypeNat v = (TypeNat)t;
-      return new TypeNat(T, v.getValue());
+    }  */
+    if(T.isUNIT() && t.typeOf().isUNIT())
+    { return new PrimUnit(T);
     }  
-    */  
-    //else 
-    if(T.isCHAR() && t.typeOf().isCHAR())
+    else if(T.isBOOL() && t.typeOf().isBOOL()) 
+    { PrimBool v = (PrimBool)t;
+      return new PrimBool(T, v.getValue());
+    }
+    else if(T.isCHAR() && t.typeOf().isCHAR())
     { PrimChar v = (PrimChar)t;
       return new PrimChar(T, v.getValue());
     } 
@@ -118,6 +113,10 @@ public class Main
     { PrimString v = (PrimString)t;
       return new PrimString(T, v.getValue());
     }    
+    else if(T.isNAT() && t.typeOf().isNAT())
+    { PrimNat v = (PrimNat)t;
+      return new PrimNat(T, v.getValue());
+    }  
     /*
     // model structured types one by one
     else if(T.isPRODUCT() && t.typeOf().isPRODUCT() && T.equals(t.typeOf()))

@@ -1,6 +1,5 @@
 package type;
 
-//import value.TypeList;
 //import value.TypeMapping;
 //import value.TypeMultiset;
 //import value.TypeSet;

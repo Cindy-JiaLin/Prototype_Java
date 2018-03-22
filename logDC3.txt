@@ -1,0 +1,66 @@
+1 Get main method back to each diff class.
+
+The reason is the parameter of the writeHTML(PartialSolution solution). If I would like to present the result as a html file, the html file name must be in ListDiff itself.
+
+2 Distinguish ListDiff class, ListStringDiff class and PrimStringDiff class
+  
+  i) ListDiff is used to compare two TypeLists. A TypeList is a List<TypeT>.
+
+  ii) ListStringDiff is used to compare two List<String>, it is a special case to compare two source code files or two text files.
+
+  iii) PrimStringDiff is used to compare two PrimString. It will be called by the ListDiff class when the ListDiff is used to compare two List<PrimString>.
+
+
+3 We have three ways to compare two source code files. See the diff_Lists_Strings.sh file:
+
+  i) Execute dcprototype.Main compare two values with their type, no html presentation. This Main class will call the ListDiff class.
+
+     java -cp lib dcprototype.Main -diff -sim -type testTYPE/LIST_STRING.TYPE -source testVALUE/list_string_1.VALUE -target testVALUE/list_string_2.VALUE 
+
+The result in terminal window:
+     
+resTYPE: LIST(STRING)
+resV1: [package string;,,public class StringDiff]
+resV2: [package string;,,public class ListDiff]
+[=p=u=b=l=i=c= =c=l=a=s=s= +L+i+s-S=t-r-i-n-g=D=i=f=f??][36/44,36/44]
+81.818%
+[=package string;=![=p=u=b=l=i=c= =c=l=a=s=s= +L+i+s-S=t-r-i-n-g=D=i=f=f??][36/44,36/44]][66/74,66/74]
+89.189%
+duration:0s
+
+  ii) Execute diff.ListDiff compare two values with their type, html presentation is optional. See testHTMLres\test_ListDiff_12.html
+
+     java -cp lib diff.ListDiff -diff -sim -type testTYPE/LIST_STRING.TYPE -source testVALUE/list_string_1.VALUE -target testVALUE/list_string_2.VALUE -html testHTMLres/test_ListDiff_12.html
+
+  iii) Excute diff.ListStringDiff compare two List<String> without type parameter, html presentation is optional. See testHTMLres\test_ListStringDiff_12.html. The ListDiff only can be applied to text files, only call PrimStringDiff.
+
+The result in terminal window:
+
+resTYPE: LIST(STRING)
+resV1: [package string;,,public class StringDiff]
+resV2: [package string;,,public class ListDiff]
+[=package string;=![=p=u=b=l=i=c= =c=l=a=s=s= +L+i+s-S=t-r-i-n-g=D=i=f=f??][36/44,36/44]][66/74,66/74]
+89.189%
+duration:0s
+     java -cp lib diff.ListStringDiff -diff -sim -source testVALUE/list_string_1_source.VALUE -target testVALUE/list_string_2_target.VALUE -html testHTMLres/test_ListStringDiff_12.html
+
+The result in terminal window:
+[=package string;=![=p=u=b=l=i=c= =c=l=a=s=s= +L+i+s-S=t-r-i-n-g=D=i=f=f??][36/44,36/44]][72/80,72/80]
+90.000%
+duration:0s
+
+4 The Similarity result of last one is different from the other two. Because of the last one counted the newline character at the end of each line. Each file has three lines, 6 \n characters more.
+
+5 PrimUnit, PrimUnitDiff, diff_Lists_Unit.sh
+6 PrimBool, PrimBoolDiff, diff_Lists_Bool.sh
+7 PrimNat, PrimNatDiff, diff_Lists_Nat.sh
+
+8 In diff_Lists_Char the following command is wrong.
+  java -cp lib dcprototype.Main -diff -sim LIST\(CHAR\) [s,u,r,v,e,y] [s,u,r,g,e,r,y]
+
+  Since, there is error prone, in terms of the Options, there is no space allowed in these two list of characters (the same of other primitive types). 
+
+  Such command structure only can be applied to diff_PrimStrings.sh
+
+9 Test list of these primitive types.
+

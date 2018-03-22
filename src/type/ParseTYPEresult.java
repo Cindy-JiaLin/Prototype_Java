@@ -7,10 +7,13 @@ package type;
 public class ParseTYPEresult 
 { private final TYPE res;
   private final String rest, error;
-  private ParseTYPEresult(TYPE res, String rest, String error){ this.res=res; this.rest=rest; this.error=error;}
+  private ParseTYPEresult(TYPE res, String rest, String error)
+  { this.res=res; this.rest=rest; this.error=error;}
   // Either res == null Or error == null
-  public static ParseTYPEresult ok(TYPE res, String rest){ return new ParseTYPEresult(res, rest, null);}
-  public static ParseTYPEresult error(String rest, String error){ return new ParseTYPEresult(null, rest, error);}        
+  public static ParseTYPEresult ok(TYPE res, String rest)
+  { return new ParseTYPEresult(res, rest, null);}
+  public static ParseTYPEresult error(String rest, String error)
+  { return new ParseTYPEresult(null, rest, error);}        
   
   public TYPE getResult() { return this.res;}  
   public String getRest() { return this.rest;}  

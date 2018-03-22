@@ -1,18 +1,18 @@
 package type;
 
-//import value.PrimBool;
+import value.PrimUnit;
+import value.PrimBool;
 import value.PrimChar;
 import value.PrimString;
+import value.PrimNat;
+//import value.PrimReal;
 import value.TypeList;
+import value.TypeSet;
 //import value.TypeMapping;
 //import value.TypeMultiset;
-//import value.PrimNat;
 import value.TypeT;
-//import value.PrimUnit;
 //import value.TypeProduct;
-//import value.TypeSet;
 //import TypeT.TypeUnion;
-//import value.PrimReal;
 //import utility.LabelandTypeT;
 //import utility.ListOfLabelandTYPEs;
 //import utility.ListOfLabelandTypeTs;
@@ -74,7 +74,6 @@ public class ParseVALUEresult
   }        
   public static ParseVALUEresult parseVALUE(TYPE T, String str)
   { str=str.trim();
-    /* 
     if(T.isUNIT())
     { if(str.startsWith("unit")) return ok(new PrimUnit(T), cutoff(str, "unit"));
       else{ return error(str, "Expected a UNIT TYPE value.");}
@@ -83,15 +82,8 @@ public class ParseVALUEresult
     { if(str.startsWith("true")){ return ok(new PrimBool(T,(boolean)true), cutoff(str, "true"));}
       else if(str.startsWith("false")){ return ok(new PrimBool(T,(boolean)false), cutoff(str, "false"));}
       else{ return error(str, "Expected a BOOL TYPE value.");}
-    }
-    else if(T.isNAT())
-    { if(startsWithInt(str)){ return ok(new PrimNat(T,Integer.parseInt(String.valueOf(getInt(str)))),cutoff(str, String.valueOf(getInt(str))));}
-      else{ return error(str, "Expected a NAT TYPE value.");}
-    }  
-    else if(T.isREAL())
-    { return ok(new PrimReal(T,getDouble(str)),cutoff(str,String.valueOf(getDouble(str))));  
-    }    
-    else*/ if(T.isCHAR())
+    } 
+    else if(T.isCHAR())
     { String c=str.substring(0,1);
       str=cutoff(str, c);
       return ok(new PrimChar(T,c.charAt(0)), str);
@@ -111,6 +103,14 @@ public class ParseVALUEresult
       str=cutoff(str,"\"");
         return ok(new PrimString(T, content), str);
     } 
+    else if(T.isNAT())
+    { if(startsWithInt(str)){ return ok(new PrimNat(T,Integer.parseInt(String.valueOf(getInt(str)))),cutoff(str, String.valueOf(getInt(str))));}
+      else{ return error(str, "Expected a NAT TYPE value.");}
+    }
+    /*  
+    else if(T.isREAL())
+    { return ok(new PrimReal(T,getDouble(str)),cutoff(str,String.valueOf(getDouble(str))));  
+    }*/  
     /*
     else if(T.isPRODUCT())
     {   if(!str.startsWith("(")){ return error(str, "Expected a '(' at the beginning of a PRODUCT TYPE value.");}
@@ -175,7 +175,8 @@ public class ParseVALUEresult
       str=head.getRest().trim();
       TypeList list = new TypeList(T.getBaseTYPE()).append(head.getResult());
       while(!str.startsWith("]"))
-      {   if(!str.startsWith(",")){ return error(str, "Expected a ',' between elements in TypeList.");}
+      { if(!str.startsWith(","))
+        { return error(str, "Expected a ',' between elements in TypeList.");}
         str=cutoff(str,",");
         ParseVALUEresult newEl=parseVALUE(T.getBaseTYPE(),str);
         str=newEl.getRest().trim();
@@ -184,15 +185,14 @@ public class ParseVALUEresult
       str=cutoff(str,"]");
       return ok(list,str);
     }   
-    /*
     else if(T.isSET())
     { if(!str.startsWith("{")){ return error(str, "Expected a SET TYPE value.");}
       str=cutoff(str,"{");
-        if(str.startsWith("}")){ str=cutoff(str,"}"); return ok(TypeSet.EMPTY_SET(T.getBaseTYPE()),str);}
+        if(str.startsWith("}")){ str=cutoff(str,"}"); return ok(new TypeSet(T.getBaseTYPE()),str);}
       ParseVALUEresult head=parseVALUE(T.getBaseTYPE(),str);
         if(head.getError()!=null){ return head;}  
       str=head.getRest().trim(); 
-      TypeSet set=TypeSet.EMPTY_SET(T.getBaseTYPE()).add(head.getResult());
+      TypeSet set=new TypeSet(T.getBaseTYPE()).append(head.getResult());
       while(!str.startsWith("}"))
       {   if(!str.startsWith(",")){ return error(str, "Expected a ',' between elements in TypeSet.");}
         str=cutoff(str,",");
@@ -203,7 +203,8 @@ public class ParseVALUEresult
       str=cutoff(str,"}");
       //System.out.println("Outside loop set="+set);
       return ok(set,str);
-    }  
+    } 
+    /* 
     else if(T.isMSET())
     { if(!str.startsWith("{{")){ return error(str, "Expected a MSET TYPE value.");}
       str=cutoff(str,"{{");

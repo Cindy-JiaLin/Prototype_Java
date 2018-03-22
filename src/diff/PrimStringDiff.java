@@ -3,6 +3,7 @@ package diff;
 import sim.Sim;
 import dcprototype.HTML;
 import dcprototype.Main;
+import dcprototype.Options;
 
 import type.TYPE;
 import value.PrimString;
@@ -25,11 +26,11 @@ public class PrimStringDiff extends Diff
   // lwb==upb
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
   public boolean refine()
-  { if (Main.VERBOSE) System.out.println(this.candidates[0]);
+  { if (Main.VERBOSE || VERBOSE) System.out.println(this.candidates[0]);
     if (isFinal())
-    { if(!Main.VERBOSE && Main.DIFF) 
+    { if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
         System.out.println(this.candidates[0]);
-      if(Main.SIM) 
+      if(Main.SIM || SIM) 
         System.out.println(this.candidates[0].getSim().getPercentage());
       return true;
     }    
@@ -204,4 +205,47 @@ public class PrimStringDiff extends Diff
     public int nextA(int ia){ return ia+1;}
     public int nextB(int ib){ return ib+1;}
   }
+
+  public static boolean VERBOSE = false;// if true all intermediate states will be logged
+  public static boolean SIM = false;// displays similarity as percentage
+  public static boolean DIFF = false;// displays difference as a solution (PartialSolution) 
+  public static boolean INFO = false;// displays runtime statistics
+        
+  public static void main(String[] args) 
+  { final long startTime = System.currentTimeMillis();
+    if(Options.isSet(args, "-verbose")) { VERBOSE = true; args = Options.remove(args, "-verbose");}
+    if(Options.isSet(args, "-sim")) { SIM = true; args = Options.remove(args, "-sim");}
+    if(Options.isSet(args, "-diff")) { DIFF = true; args = Options.remove(args, "-diff");}
+    if(Options.isSet(args, "-info")) { INFO = true; args = Options.remove(args, "-info");}
+    
+    String sourceFileName = Options.getOption(args, "-source");// get the arg after the -source
+    if(sourceFileName!=null) args = Options.remove(args, "-source", sourceFileName);
+      
+    String targetFileName = Options.getOption(args, "-target");// get the arg after the -target
+    if(targetFileName!=null) args = Options.remove(args, "-target", targetFileName);
+      
+    String source = null;
+    // if sourceFileName is null get the first arg as source string to be compared
+    if(sourceFileName==null) { source = Options.getFirst(args); args = Options.removeFirst(args);}
+    else source = Options.getFileContentsAsString(sourceFileName);
+      
+    String target = null;
+    // if targetFileName is null get the first arg as target string to be compared
+    if(targetFileName==null) { target = Options.getFirst(args); args = Options.removeFirst(args);}
+    else target = Options.getFileContentsAsString(targetFileName);
+    
+    if(VERBOSE)
+    { System.out.println("SOURCE:"); System.out.println(source);
+      System.out.println("TARGET:"); System.out.println(target);
+    }    
+    if(source!=null && target!=null)
+    { PrimStringDiff diff = new PrimStringDiff(new PrimString(TYPE.STRING, source), 
+                                               new PrimString(TYPE.STRING, target));
+      for(; !diff.refine(); );
+    }
+    final long endTime   = System.currentTimeMillis();
+    final long totalTime = (endTime - startTime)/1000;
+    System.out.println("duration:"+totalTime+"s");  
+  }  
+
 }
