@@ -31,6 +31,8 @@ SET 00 same with LIST
 
    This new Replace is used to handle the mismatch label case.
 
+4. I am still confusing the sets.
+
 
 
 

@@ -13,13 +13,13 @@ import type.*;
 import value.*;
 import dcprototype.*;
 
-public class ListDiff extends Diff 
-{ private final TypeList a, b;
+public class SetDiff extends Diff 
+{ private final TypeSet a, b;
   private PartialSolution[] candidates;
   
-  public ListDiff(TypeList a, TypeList b)
+  public SetDiff(TypeSet a, TypeSet b)
   { if(!a.getBaseTYPE().equals(b.getBaseTYPE()))
-      throw new RuntimeException("These two lists have different base type values.");
+      throw new RuntimeException("These two sets have different base type values.");
     this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
@@ -101,27 +101,27 @@ public class ListDiff extends Diff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
  
-    public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
+    public String toString(){ return "{"+(trace == null ? "" : trace.toString())+"}";}  
     public String html()
     { return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
-    { return (trace == null ? Sim.UNKNOWN(ListDiff.this.a.weight()+
-                                          ListDiff.this.b.weight()) : trace.getSim());}
+    { return (trace == null ? Sim.UNKNOWN(SetDiff.this.a.weight()+
+                                          SetDiff.this.b.weight()) : trace.getSim());}
         
     public boolean refine(){ if(trace==null) return false; else return trace.refine();}        
     
     public PartialSolution delete()
-    { EditOperation op = new Delete(ListDiff.this.a.get(getSource()));
+    { EditOperation op = new Delete(SetDiff.this.a.get(getSource()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }        
     public PartialSolution insert()
-    { EditOperation op = new Insert(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Insert(SetDiff.this.b.get(getTarget()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }        
     public PartialSolution copy()
-    { EditOperation op = new Copy(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Copy(SetDiff.this.b.get(getTarget()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }      
@@ -130,51 +130,74 @@ public class ListDiff extends Diff
       Trace trace;
       TYPE baseTYPE = a.getBaseTYPE();
       if(baseTYPE.isUNIT()||baseTYPE.isBOOL()||baseTYPE.isCHAR()||baseTYPE.isNAT()||baseTYPE.isINT()) 
-      { op= new Change(new PrimDiff(ListDiff.this.a.get(getSource()), 
-                                    ListDiff.this.b.get(getTarget())));
+      { op= new Change(new PrimDiff(SetDiff.this.a.get(getSource()), 
+                                    SetDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
       else if(baseTYPE.isSTRING())
-      { op= new Change(new PrimStringDiff((PrimString)ListDiff.this.a.get(getSource()), 
-                                          (PrimString)ListDiff.this.b.get(getTarget())));
+      { op= new Change(new PrimStringDiff((PrimString)SetDiff.this.a.get(getSource()), 
+                                          (PrimString)SetDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
       else if(baseTYPE.isPRODUCT()) 
-      { op= new Change(new ProductDiff((TypeProduct)ListDiff.this.a.get(getSource()), 
-                                       (TypeProduct)ListDiff.this.b.get(getTarget())));
+      { op= new Change(new ProductDiff((TypeProduct)SetDiff.this.a.get(getSource()), 
+                                       (TypeProduct)SetDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
       else if(baseTYPE.isUNION()) 
-      { op= new Change(new UnionDiff((TypeUnion)ListDiff.this.a.get(getSource()), 
-                                     (TypeUnion)ListDiff.this.b.get(getTarget())));
+      { op= new Change(new UnionDiff((TypeUnion)SetDiff.this.a.get(getSource()), 
+                                     (TypeUnion)SetDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
       else if(baseTYPE.isLIST())
-      { op= new Change(new ListDiff((TypeList)ListDiff.this.a.get(getSource()), 
-                                    (TypeList)ListDiff.this.b.get(getTarget())));
+      { op= new Change(new ListDiff((TypeList)SetDiff.this.a.get(getSource()), 
+                                    (TypeList)SetDiff.this.b.get(getTarget())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
+      else if(baseTYPE.isSET())
+      { op= new Change(new SetDiff((TypeSet)SetDiff.this.a.get(getSource()), 
+                                   (TypeSet)SetDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
       else throw new RuntimeException("More Types need to be explored.");
     }        
     private PartialSolution[] expand()
-    { if(ListDiff.this.b.size() ==  getTarget())
-      { if(ListDiff.this.a.size() == getSource()) return new PartialSolution[0];
+    { if(SetDiff.this.b.size() == getSource())
+      { if(SetDiff.this.a.size() == getTarget()) return new PartialSolution[0];
         else return new PartialSolution[]{ delete()};
       }
-      else if(ListDiff.this.a.size() == getSource()) 
+      else if(SetDiff.this.a.size() == getSource()) 
              return new PartialSolution[]{ insert()};
-      else if(ListDiff.this.a.get(getSource()).weight()==0) 
+      else if(SetDiff.this.a.get(getSource()).weight()==0) 
              return new PartialSolution[]{ delete(), insert()};// delete an empty line 
-      else if(ListDiff.this.b.get(getTarget()).weight()==0) 
+      else if(SetDiff.this.b.get(getTarget()).weight()==0) 
              return new PartialSolution[]{ delete(), insert()};// insert an empty line
       else return new PartialSolution[]{ change(), insert(), delete()};
     }        
-    
+    private PartialSolution[] allChanges()
+    { ?????
+    }
+    private PartialSolution[] allDeletion()
+    { int a_size = SetDiff.this.a.size();
+      PartialSolution[] deletions = new PartialSolution[a_size];
+      for(int i=0; i<a_size; i++)
+        deletions[i] = delete();
+      return deletions;
+    }
+    private PartialSolution[] allInsertion()
+    { int b_size = SetDiff.this.b.size();
+      PartialSolution[] insertions = new PartialSolution[b_size];
+      for(int i=0; i<b_size; i++)
+        insertions[i] = insert(); 
+      return insertions;
+    }    
+ 
     // Get the last copy operation position
     public int getStopper(Trace trace)
     { if(trace == null) return -1;
@@ -221,7 +244,7 @@ public class ListDiff extends Diff
       this.op = op;
       this.ia = op.nextA(trace == null ? 0 : trace.ia);
       this.ib = op.nextB(trace == null ? 0 : trace.ib);
-      this.sim = op.calculate(trace == null ? ListDiff.this.getUnknown() :  trace.getSim());
+      this.sim = op.calculate(trace == null ? SetDiff.this.getUnknown() :  trace.getSim());
     }        
     public String toString()
     { return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
@@ -231,7 +254,7 @@ public class ListDiff extends Diff
 
     public boolean refine()
     { if(this.op.refine()) return true;
-      this.sim=this.op.calculate(trace==null ? ListDiff.this.getUnknown() : trace.getSim());
+      this.sim=this.op.calculate(trace==null ? SetDiff.this.getUnknown() : trace.getSim());
       return false;
     }
   }
@@ -324,6 +347,12 @@ public class ListDiff extends Diff
         (SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ListDiff)diff).html());
       }
+      else if(diff instanceof SetDiff)
+      { return HTML.TD(HTML.CHG,ia)+
+               HTML.TD(HTML.CHG,ib)+
+        (SIM ? HTML.TD(""+((SetDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD(HTML.CHG, ((SetDiff)diff).html());
+      }
       else throw new RuntimeException("Currently, there is no other diff.");
     }
 
@@ -399,7 +428,7 @@ public class ListDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
+    { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
       for(; !diff.refine(); );
       if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
       System.out.println(diff.getFirstCand());

@@ -1,36 +1,29 @@
-package diff;
-
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
+package diff; 
 
 import sim.Sim;
 import type.*;
 import value.*;
 import dcprototype.*;
 
-public class ListDiff extends Diff 
-{ private final TypeList a, b;
+public class TestDiff 
+{ private final TypeT a, b;
   private PartialSolution[] candidates;
   
-  public ListDiff(TypeList a, TypeList b)
-  { if(!a.getBaseTYPE().equals(b.getBaseTYPE()))
-      throw new RuntimeException("These two lists have different base type values.");
+  public TestDiff(TypeT a, TypeT b)
+  { if(!a.typeOf().equals(b.typeOf())) 
+      throw new RuntimeException("a="+a+" and b="+b+" have different TYPEs.");
     this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
-   
+  
+  public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());} 
+
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}  
-  public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
-  public PartialSolution getFirstCand(){ return this.candidates[0];}
 
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
+
   public boolean refine()
   { if (Main.VERBOSE || VERBOSE) 
     { System.out.println(this.candidates[0]);
@@ -52,7 +45,14 @@ public class ListDiff extends Diff
     { Arrays.sort(this.candidates, simComparator);// sort the candidates after each inside refine step
       return false;
     }
-    else if (isFinal()){ return true;}    
+    else if (isFinal())
+    { if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
+      System.out.println(this.candidates[0]);
+      if(HTMLCODE) writeHTML(this.candidates[0]);
+      if(Main.SIM||SIM) 
+      System.out.println(this.candidates[0].getSim().getPercentage());
+      return true;
+    }    
     else// when each edit operation has been completely refined, expand one more step
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
@@ -93,7 +93,7 @@ public class ListDiff extends Diff
     return res;
   }
  
-  // inner class, i.e. it has implicit reference to ListDiff i.e. a, b
+  // inner class, i.e. it has implicit reference to Diff i.e. a, b
   private class PartialSolution  
   { private final Trace trace;
     private PartialSolution(Trace trace){ this.trace = trace;}
@@ -103,25 +103,35 @@ public class ListDiff extends Diff
  
     public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
     public String html()
-    { return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    { return HTML.TABLE(trace.html()+
+      (SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
-    { return (trace == null ? Sim.UNKNOWN(ListDiff.this.a.weight()+
-                                          ListDiff.this.b.weight()) : trace.getSim());}
+    { return (trace == null ? Sim.UNKNOWN(Diff.this.a.weight()+
+                                          Diff.this.b.weight()) : trace.getSim());}
         
     public boolean refine(){ if(trace==null) return false; else return trace.refine();}        
     
     public PartialSolution delete()
-    { EditOperation op = new Delete(ListDiff.this.a.get(getSource()));
+    { EditOperation op;
+      TYPE t = Diff.this.a.typeOf();
+      if(t.isPRIMITIVE()||t.isREAL())
+      { op = new Delete(Diff.this.a);}
+      // PRODUCT TYPE has no Delete
+      else if(t.isUNION())
+      { op = new Delete(Diff.this.a.getValue();}
+      else if(t.isLIST()||t.isSET()||t.isMSET())
+      { op = new Delete(Diff.this.a.get(getSource()));}
+      
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }        
     public PartialSolution insert()
-    { EditOperation op = new Insert(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Insert(Diff.this.b.get(getTarget()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }        
     public PartialSolution copy()
-    { EditOperation op = new Copy(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Copy(Diff.this.b.get(getTarget()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }      
@@ -129,9 +139,21 @@ public class ListDiff extends Diff
     { EditOperation op;
       Trace trace;
       TYPE baseTYPE = a.getBaseTYPE();
-      if(baseTYPE.isUNIT()||baseTYPE.isBOOL()||baseTYPE.isCHAR()||baseTYPE.isNAT()||baseTYPE.isINT()) 
-      { op= new Change(new PrimDiff(ListDiff.this.a.get(getSource()), 
-                                    ListDiff.this.b.get(getTarget())));
+      if(baseTYPE.isUNIT()) 
+      { op= new Change(new PrimUnitDiff((PrimUnit)ListDiff.this.a.get(getSource()), 
+                                        (PrimUnit)ListDiff.this.b.get(getTarget())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
+      else if(baseTYPE.isBOOL()) 
+      { op= new Change(new PrimBoolDiff((PrimBool)ListDiff.this.a.get(getSource()), 
+                                        (PrimBool)ListDiff.this.b.get(getTarget())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
+      else if(baseTYPE.isCHAR()) 
+      { op= new Change(new PrimCharDiff((PrimChar)ListDiff.this.a.get(getSource()), 
+                                        (PrimChar)ListDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
@@ -141,25 +163,30 @@ public class ListDiff extends Diff
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
+      else if(baseTYPE.isNAT()) 
+      { op= new Change(new PrimNatDiff((PrimNat)ListDiff.this.a.get(getSource()), 
+                                       (PrimNat)ListDiff.this.b.get(getTarget())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
+      else if(baseTYPE.isINT()) 
+      { op= new Change(new PrimIntDiff((PrimInt)ListDiff.this.a.get(getSource()), 
+                                       (PrimInt)ListDiff.this.b.get(getTarget())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
       else if(baseTYPE.isPRODUCT()) 
       { op= new Change(new ProductDiff((TypeProduct)ListDiff.this.a.get(getSource()), 
                                        (TypeProduct)ListDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isUNION()) 
-      { op= new Change(new UnionDiff((TypeUnion)ListDiff.this.a.get(getSource()), 
-                                     (TypeUnion)ListDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isLIST())
+      else//(baseTYPE.isLIST())
       { op= new Change(new ListDiff((TypeList)ListDiff.this.a.get(getSource()), 
                                     (TypeList)ListDiff.this.b.get(getTarget())));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else throw new RuntimeException("More Types need to be explored.");
     }        
     private PartialSolution[] expand()
     { if(ListDiff.this.b.size() ==  getTarget())
@@ -168,6 +195,9 @@ public class ListDiff extends Diff
       }
       else if(ListDiff.this.a.size() == getSource()) 
              return new PartialSolution[]{ insert()};
+      // both are non-empty lists
+      else if(ListDiff.this.a.get(getSource()).equals(ListDiff.this.b.get(getTarget()))) 
+             return new PartialSolution[]{ copy()};
       else if(ListDiff.this.a.get(getSource()).weight()==0) 
              return new PartialSolution[]{ delete(), insert()};// delete an empty line 
       else if(ListDiff.this.b.get(getTarget()).weight()==0) 
@@ -294,11 +324,23 @@ public class ListDiff extends Diff
     public Change(Diff diff){ this.diff=diff;}
     public String toString(){ return "!"+diff;}
     public String html(int ia, int ib)
-    { if(diff instanceof PrimDiff)
+    { if(diff instanceof PrimUnitDiff)
       { return HTML.TD(HTML.CHG,ia)+
                HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((PrimDiff)diff).getSim().getPercentage1()+" ") : "")+
-               HTML.TD(HTML.CHG, ((PrimDiff)diff).html());
+        (SIM ? HTML.TD(""+((PrimUnitDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD(HTML.CHG, ((PrimUnitDiff)diff).html());
+      }
+      else if(diff instanceof PrimBoolDiff)
+      { return HTML.TD(HTML.CHG,ia)+
+               HTML.TD(HTML.CHG,ib)+
+        (SIM ? HTML.TD(""+((PrimBoolDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD(HTML.CHG, ((PrimBoolDiff)diff).html());
+      }
+      else if(diff instanceof PrimCharDiff)
+      { return HTML.TD(HTML.CHG,ia)+
+               HTML.TD(HTML.CHG,ib)+
+        (SIM ? HTML.TD(""+((PrimCharDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD(HTML.CHG, ((PrimCharDiff)diff).html());
       }
       else if(diff instanceof PrimStringDiff)
       { return HTML.TD(HTML.CHG,ia)+
@@ -306,17 +348,11 @@ public class ListDiff extends Diff
         (SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimStringDiff)diff).html());
       }
-      else if(diff instanceof ProductDiff)
+      else if(diff instanceof PrimNatDiff)
       { return HTML.TD(HTML.CHG,ia)+
                HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
-               HTML.TD(HTML.CHG, ((ProductDiff)diff).html());
-      }
-      else if(diff instanceof UnionDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((UnionDiff)diff).getSim().getPercentage1()+" ") : "")+
-               HTML.TD(HTML.CHG, ((UnionDiff)diff).html());
+        (SIM ? HTML.TD(""+((PrimNatDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD(HTML.CHG, ((PrimNatDiff)diff).html());
       }
       else if(diff instanceof ListDiff)
       { return HTML.TD(HTML.CHG,ia)+
@@ -360,37 +396,49 @@ public class ListDiff extends Diff
     
     htmlFileName=Options.getOption(args, "-html");
     if(htmlFileName!=null){ HTMLCODE=true; args=Options.remove(args,"-html", htmlFileName);}
+     
     String typeFileName=Options.getOption(args, "-type");//get the arg after the -type
     if(typeFileName!=null) args = Options.remove(args, "-type", typeFileName);
+
     String sourceFileName = Options.getOption(args, "-source");// get the arg after the -source
     if(sourceFileName!=null) args = Options.remove(args, "-source", sourceFileName);
+      
     String targetFileName = Options.getOption(args, "-target");// get the arg after the -target
     if(targetFileName!=null) args = Options.remove(args, "-target", targetFileName);
-    // parse TYPE
+
     String strTYPE = null;
     if(typeFileName==null)
-    { strTYPE = Options.getFirst(args); args = Options.removeFirst(args);}
+    { strTYPE = Options.getFirst(args); args = Options.removeFirst(args);
+      //System.out.println("strTYPE: "+strTYPE);
+    }
     else strTYPE = Options.getFileContentsAsString(typeFileName);
+    //System.out.println("strTYPE: "+strTYPE);
     List<String> lovs = new ArrayList<String>();
     TYPE resTYPE=ParseTYPEresult.parseTYPE(lovs, strTYPE).getResult();//parse TYPE
     System.out.println("resTYPE: "+resTYPE);
-    // parse the first value
+
     String source = null;
     // if sourceFileName is null get the first arg as source string to be compared
     if(sourceFileName==null) 
-    { source = Options.getFirst(args); args = Options.removeFirst(args);}
+    { source = Options.getFirst(args); args = Options.removeFirst(args);
+      //System.out.println("source: "+source);
+    }
     else source = Options.getFileContentsAsString(sourceFileName);
+    //System.out.println("source: "+source);
     TypeT resV1=ParseVALUEresult.parseVALUE(resTYPE, source).getResult();//parse VALUE1 
     System.out.println("resV1: "+resV1);
-    // parse the second value
+    
     String target = null;
     // if targetFileName is null get the first arg as target string to be compared
     if(targetFileName==null) 
-    { target = Options.getFirst(args); args = Options.removeFirst(args);}
+    { target = Options.getFirst(args); args = Options.removeFirst(args);
+      //System.out.println("target: "+target);
+    }
     else target = Options.getFileContentsAsString(targetFileName);
+    //System.out.println("target: "+target);
     TypeT resV2=ParseVALUEresult.parseVALUE(resTYPE, target).getResult();//parse VALUE2
     System.out.println("resV2: "+resV2);
-    // model values to be typed values
+
     TypeT model1 = Main.model(resTYPE, resV1);
     TypeT model2 = Main.model(resTYPE, resV2);
         
@@ -399,13 +447,26 @@ public class ListDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
-      for(; !diff.refine(); );
-      if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-      System.out.println(diff.getFirstCand());
-      if(HTMLCODE) writeHTML(diff.getFirstCand());
-      if(Main.SIM||SIM) 
-      System.out.println(diff.getSim().getPercentage());    
+    { if(resTYPE.isCHAR())
+      { PrimCharDiff diff = new PrimCharDiff((PrimChar)resV1, (PrimChar)resV2);
+        for(; !diff.refine(); );
+      }
+      else if(resTYPE.isSTRING())
+      { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
+        for(; !diff.refine(); );
+      }
+      else if(resTYPE.isNAT())
+      { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
+        for(; !diff.refine(); );
+      }
+      else if(resTYPE.isPRODUCT())
+      { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
+        for(; !diff.refine(); );
+      }
+      else if(resTYPE.isLIST())
+      { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
+        for(; !diff.refine(); );
+      }
     }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
