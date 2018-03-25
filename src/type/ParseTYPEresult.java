@@ -207,7 +207,8 @@ public class ParseTYPEresult
       { int squareIndex1 = str.indexOf("]");
         if(squareIndex1==-1) 
           throw new RuntimeException("Expected a correct form of UNION TYPE");
-        int dotIndex1=str.indexOf(".");
+        String strBeforeSquare = str.substring(0, squareIndex1);
+        int dotIndex1=strBeforeSquare.indexOf(".");
         if(dotIndex1==-1)// this is a label without TYPE, which indicates it a UNIT TYPE
         { label1 = str.substring(0,squareIndex1);
           str=cutoff(str, label1);
@@ -247,15 +248,14 @@ public class ParseTYPEresult
       }
       for(int i=1; !str.startsWith("]"); i++)
       { str=cutoff(str, "|");
-          System.out.println("current str="+str);
         String label;
         int barIndex = str.indexOf("|");
         if(barIndex==-1)
         { int squareIndex = str.indexOf("]");
-          System.out.println("str="+str+" squareIndex="+squareIndex);
           if(squareIndex==-1) 
             throw new RuntimeException("Expected a correct form of UNION TYPE");
-          int dotIndex=str.indexOf(".");
+          String strBeforeSquare = str.substring(0, squareIndex);
+          int dotIndex=strBeforeSquare.indexOf(".");
           if(dotIndex==-1)
           { label = str.substring(0,squareIndex);
             str=cutoff(str, label);
@@ -342,8 +342,8 @@ public class ParseTYPEresult
       return ok(TYPE.MSET(baseTYPE.getResult()),str);     
     }
     /* MAPPING */
-    else if(str.startsWith("Mapping")) 
-    { str=cutoff(str, "Mapping");
+    else if(str.startsWith("Map")) 
+    { str=cutoff(str, "Map");
       ParseTYPEresult t1 = parseTYPE(varNames, str);
         if(t1.getError()!=null) return t1;
       str=t1.getRest().trim();

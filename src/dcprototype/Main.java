@@ -72,25 +72,37 @@ public class Main
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { if(resTYPE.isCHAR())
-      { PrimCharDiff diff = new PrimCharDiff((PrimChar)resV1, (PrimChar)resV2);
+    { if(resTYPE.isUNIT()||resTYPE.isBOOL()||resTYPE.isCHAR()||resTYPE.isNAT()||resTYPE.isINT())
+      { PrimDiff diff = new PrimDiff(resV1, resV2);
         for(; !diff.refine(); );
       }
       else if(resTYPE.isSTRING())
       { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
         for(; !diff.refine(); );
       }
-      else if(resTYPE.isNAT())
-      { PrimNatDiff diff = new PrimNatDiff((PrimNat)resV1, (PrimNat)resV2);
-        for(; !diff.refine(); );
-      }
       else if(resTYPE.isPRODUCT())
       { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
         for(; !diff.refine(); );
+        if(!(VERBOSE) && (DIFF)) 
+           System.out.println(diff.getFirstCand());
+        if(SIM) 
+          System.out.println(diff.getSim().getPercentage());
+      }
+      else if(resTYPE.isUNION())
+      { UnionDiff diff = new UnionDiff((TypeUnion)resV1, (TypeUnion)resV2);
+        for(; !diff.refine(); );
+        if(!(VERBOSE) && (DIFF)) 
+           System.out.println(diff.getFirstCand());
+        if(SIM) 
+          System.out.println(diff.getSim().getPercentage());
       }
       else if(resTYPE.isLIST())
       { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
         for(; !diff.refine(); );
+        if(!(VERBOSE) && (DIFF)) 
+           System.out.println(diff.getFirstCand());
+        if(SIM) 
+          System.out.println(diff.getSim().getPercentage());
       }
     }  
     final long endTime   = System.currentTimeMillis();

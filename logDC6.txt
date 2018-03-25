@@ -1,0 +1,36 @@
+Improve from DC5
+
+6. All Diff have the same structure, only the expand method is different.
+*************************************************************************************
+
+PRIMITIVE 00             cpy | rep.(del, ins) | chg
+
+PRODUCT 00 11 22 …       chg, chg, chg, …
+
+UNION 00                 l1.chg | mismatch. (del.l1, ins.l2)
+
+LIST 00 01 10 11 12 21 22 …   chg, ins, del, chg, ins, del, chg, …
+
+SET 00 same with LIST
+    01 
+    02
+    …
+    10
+    11
+    12
+    …
+    20
+    21
+    22
+************************************************************************************** 
+1. PrimUnitDiff, PrimBoolDiff, PrimCharDiff, PrimNatDiff and PrimIntDiff
+   become to one PrimDiff
+2. ProductDiff
+
+3. UnionDiff, have to add a subclass of EditOperation called Replace.
+
+   This new Replace is used to handle the mismatch label case.
+
+
+
+

@@ -1,3 +1,3 @@
 # m)
 
-[nil | right.(Mapping Char=>Nat)]
+[nil | right.(Map Char=>Nat)]

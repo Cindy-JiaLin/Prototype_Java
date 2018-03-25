@@ -213,7 +213,7 @@ public class TYPE
   { if (obj instanceof TYPE)
     { TYPE that=(TYPE)obj;
       if(this.isPRIMITIVE()&&that.isPRIMITIVE()){ return this.name.equals(that.name);}
-      else if(this.isREAL()&&that.isREAL()){ return this.acc==that.acc;}
+      else if(this.isREAL()&&that.isREAL()){ return Math.abs(this.acc-that.acc)<1.0e-6;}
       //For Structured TYPEs, if they are the same TYPE, 
       //the name of them should be equals to each other.
       else if(this.isPRODUCT()&&that.isPRODUCT())

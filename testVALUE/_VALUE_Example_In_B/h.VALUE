@@ -1,3 +1,3 @@
 #Set {name.String*age.Nat*marriage.[single.Bool|married.Bool|separated.Bool|divorced.Bool|widowed.Bool]*address.String}
 
-{(name="Alice", age=35, marriage=single.true, address="3 College Manor, Hoeys Lane, Dundalk"),(name="Bob", age=19, marriage=married.true, address="8 Brickfield Garden, Newry Road, Dundalk")}
+{(name="Alice", age=35, marriage=single, address="3 College Manor, Hoeys Lane, Dundalk"),(name="Bob", age=19, marriage=married, address="8 Brickfield Garden, Newry Road, Dundalk")}

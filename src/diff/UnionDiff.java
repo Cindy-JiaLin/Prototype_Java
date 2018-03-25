@@ -13,11 +13,11 @@ import type.*;
 import value.*;
 import dcprototype.*;
 
-public class ListDiff extends Diff 
-{ private final TypeList a, b;
+public class UnionDiff extends Diff 
+{ private final TypeUnion a, b;
   private PartialSolution[] candidates;
   
-  public ListDiff(TypeList a, TypeList b)
+  public UnionDiff(TypeUnion a, TypeUnion b)
   { this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
@@ -31,9 +31,9 @@ public class ListDiff extends Diff
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
   public boolean refine()
   { if (Main.VERBOSE || VERBOSE) 
-    { System.out.println(this.candidates[0]);
+    { //System.out.println(this.candidates[0]);
       for(int i=0; i<this.candidates.length; i++)
-        System.out.println(""+i+": "+this.candidates[i].getSim());
+        System.out.println(""+i+": "+this.candidates[i].getSim()+this.candidates[i]);
       System.out.println();
     }
     // the initial state, the trace is null, outside refine is needed
@@ -99,81 +99,78 @@ public class ListDiff extends Diff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
  
-    public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
+    public String toString()
+    { String la = UnionDiff.this.a.getLabel();
+      String lb = UnionDiff.this.b.getLabel();
+      return (trace == null ? "" : (la.equals(lb) ? la+"." : "mismatch: ")+trace.toString());}  
     public String html()
     { return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
-    { return (trace == null ? Sim.UNKNOWN(ListDiff.this.a.weight()+
-                                          ListDiff.this.b.weight()) : trace.getSim());}
+    { return (trace == null ? Sim.UNKNOWN(UnionDiff.this.a.weight()+
+                                          UnionDiff.this.b.weight()) : trace.getSim());}
         
     public boolean refine(){ if(trace==null) return false; else return trace.refine();}        
     
     public PartialSolution delete()
-    { EditOperation op = new Delete(ListDiff.this.a.get(getSource()));
+    { EditOperation op = new Delete(UnionDiff.this.a);
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }        
     public PartialSolution insert()
-    { EditOperation op = new Insert(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Insert(UnionDiff.this.b);
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
-    }        
+    }       
+    public PartialSolution replace()
+    { EditOperation op = new Replace(UnionDiff.this.a, UnionDiff.this.b);
+      Trace trace = new Trace(this.trace, op);
+      return new PartialSolution(trace);
+    } 
     public PartialSolution copy()
-    { EditOperation op = new Copy(ListDiff.this.b.get(getTarget()));
+    { EditOperation op = new Copy(UnionDiff.this.b.getValue());
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }      
     public PartialSolution change()
     { EditOperation op;
       Trace trace;
-      TYPE baseTYPE = a.getBaseTYPE();
-      if(baseTYPE.isUNIT()||baseTYPE.isBOOL()||baseTYPE.isCHAR()||baseTYPE.isNAT()||baseTYPE.isINT()) 
-      { op= new Change(new PrimDiff(ListDiff.this.a.get(getSource()), 
-                                    ListDiff.this.b.get(getTarget())));
+      TYPE t = a.getValue().typeOf();
+      if(t.isUNIT()||t.isBOOL()||t.isCHAR()||t.isNAT()||t.isINT()) 
+      { op= new Change(new PrimDiff(UnionDiff.this.a.getValue(), 
+                                    UnionDiff.this.b.getValue()));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isSTRING())
-      { op= new Change(new PrimStringDiff((PrimString)ListDiff.this.a.get(getSource()), 
-                                          (PrimString)ListDiff.this.b.get(getTarget())));
+      else if(t.isSTRING())
+      { op= new Change(new PrimStringDiff((PrimString)UnionDiff.this.a.getValue(), 
+                                          (PrimString)UnionDiff.this.b.getValue()));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isPRODUCT()) 
-      { op= new Change(new ProductDiff((TypeProduct)ListDiff.this.a.get(getSource()), 
-                                       (TypeProduct)ListDiff.this.b.get(getTarget())));
+      else if(t.isPRODUCT()) 
+      { op= new Change(new ProductDiff((TypeProduct)UnionDiff.this.a.getValue(), 
+                                       (TypeProduct)UnionDiff.this.b.getValue()));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isUNION()) 
-      { op= new Change(new UnionDiff((TypeUnion)ListDiff.this.a.get(getSource()), 
-                                     (TypeUnion)ListDiff.this.b.get(getTarget())));
+      else if(t.isUNION()) 
+      { op= new Change(new UnionDiff((TypeUnion)UnionDiff.this.a.getValue(), 
+                                     (TypeUnion)UnionDiff.this.b.getValue()));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
-      else if(baseTYPE.isLIST())
-      { op= new Change(new ListDiff((TypeList)ListDiff.this.a.get(getSource()), 
-                                    (TypeList)ListDiff.this.b.get(getTarget())));
+      else if(t.isLIST())
+      { op= new Change(new ListDiff((TypeList)UnionDiff.this.a.getValue(), 
+                                    (TypeList)UnionDiff.this.b.getValue()));
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
       else throw new RuntimeException("More Types need to be explored.");
     }        
     private PartialSolution[] expand()
-    { if(ListDiff.this.b.size() ==  getTarget())
-      { if(ListDiff.this.a.size() == getSource()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete()};
-      }
-      else if(ListDiff.this.a.size() == getSource()) 
-             return new PartialSolution[]{ insert()};
-      // both are non-empty lists
-      else if(ListDiff.this.a.get(getSource()).equals(ListDiff.this.b.get(getTarget()))) 
-             return new PartialSolution[]{ copy()};
-      else if(ListDiff.this.a.get(getSource()).weight()==0) 
-             return new PartialSolution[]{ delete(), insert()};// delete an empty line 
-      else if(ListDiff.this.b.get(getTarget()).weight()==0) 
-             return new PartialSolution[]{ delete(), insert()};// insert an empty line
-      else return new PartialSolution[]{ change(), insert(), delete()};
+    { if(!UnionDiff.this.a.getLabel().equals(UnionDiff.this.b.getLabel())) 
+        return new PartialSolution[]{ replace()};
+      else return new PartialSolution[]{ change()};
     }        
     
     // Get the last copy operation position
@@ -222,17 +219,19 @@ public class ListDiff extends Diff
       this.op = op;
       this.ia = op.nextA(trace == null ? 0 : trace.ia);
       this.ib = op.nextB(trace == null ? 0 : trace.ib);
-      this.sim = op.calculate(trace == null ? ListDiff.this.getUnknown() :  trace.getSim());
+      this.sim = op.calculate(trace == null ? UnionDiff.this.getUnknown() :  trace.getSim());
     }        
     public String toString()
-    { return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
+    { String la = UnionDiff.this.a.getLabel();
+      String lb = UnionDiff.this.b.getLabel();
+      return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
     public String html()
     { return(this.trace != null ? this.trace.html() : "")+HTML.TR(op.html(ia,ib));}
     public Sim getSim(){ return this.sim;}
 
     public boolean refine()
     { if(this.op.refine()) return true;
-      this.sim=this.op.calculate(trace==null ? ListDiff.this.getUnknown() : trace.getSim());
+      this.sim=this.op.calculate(trace==null ? UnionDiff.this.getUnknown() : trace.getSim());
       return false;
     }
   }
@@ -275,6 +274,22 @@ public class ListDiff extends Diff
     public int nextA(int ia){ return ia+1;}
     public int nextB(int ib){ return ib;}
   }
+  private final static class Replace extends EditOperation
+  { private final TypeT c1, c2;
+    public Replace(TypeT c1, TypeT c2){ this.c1=c1; this.c2=c2;}
+    public String toString(){ return "(-"+c1+", +"+c2+")";}
+    public String html(int ia, int ib)
+    {return HTML.TD(HTML.DEL,ia)+
+            HTML.TD(HTML.INS,ib)+
+     (SIM ? HTML.TD(""): "")+
+            HTML.TD(HTML.DEL, HTML.encode("-"+c1))+
+            HTML.TD(HTML.INS, HTML.encode("+"+c2));
+    }
+    public Sim calculate(Sim sim){ return sim.dec(c1.weight()).dec(c2.weight());}
+    public boolean refine(){ return true;}
+    public int nextA(int ia){ return ia+1;}
+    public int nextB(int ib){ return ib+1;}
+  }
   private final static class Copy extends EditOperation
   { private final TypeT c;
     public Copy(TypeT c){ this.c=c;}
@@ -293,7 +308,7 @@ public class ListDiff extends Diff
   private final static class Change extends EditOperation
   { private final Diff diff;
     public Change(Diff diff){ this.diff=diff;}
-    public String toString(){ return "!"+diff;}
+    public String toString(){ return ""+diff;}
     public String html(int ia, int ib)
     { if(diff instanceof PrimDiff)
       { return HTML.TD(HTML.CHG,ia)+
@@ -400,7 +415,7 @@ public class ListDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
+    { UnionDiff diff = new UnionDiff((TypeUnion)resV1, (TypeUnion)resV2);
       for(; !diff.refine(); );
       if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
       System.out.println(diff.getFirstCand());

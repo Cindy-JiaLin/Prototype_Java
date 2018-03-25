@@ -1,3 +1,3 @@
 # n)
 
-Mapping [left.Real(0.1)right.Real(0.5)]=>Real(0.5)
+Map [left.Real(0.1)right.Real(0.5)]=>Real(0.5)

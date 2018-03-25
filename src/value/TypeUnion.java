@@ -16,7 +16,8 @@ public class TypeUnion extends TypeT
       throw new RuntimeException("This TYPE T="+T+" does not contain this TYPE value="+value);
     this.T=T; this.label=label; this.value=value;
   }
-  public String toString()
+  public String toString(){ return this.label+"."+this.value;}
+  public String beautify()
   { return (value.typeOf().isUNIT()) ? this.label : this.label+"."+this.value;}
   public boolean equals(Object obj)
   { if(obj instanceof TypeUnion)
@@ -28,6 +29,7 @@ public class TypeUnion extends TypeT
   }
   public TYPE typeOf(){ return this.T;}
   public int weight(){ return this.value.weight();}
+
   public String getLabel(){ return this.label;}
   public TypeT getValue(){ return this.value;}
 }
