@@ -104,6 +104,15 @@ public class Main
         if(SIM) 
           System.out.println(diff.getSim().getPercentage());
       }
+      else if(resTYPE.isSET())
+      { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
+        for(; !diff.refine(); );
+        if(!(VERBOSE) && (DIFF)) 
+           System.out.println(diff.getFirstCand());
+        if(SIM) 
+          System.out.println(diff.getSim().getPercentage());
+      }
+
     }  
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;

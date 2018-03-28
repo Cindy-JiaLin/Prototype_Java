@@ -21,7 +21,7 @@ public class SetDiff extends Diff
   { if(!a.getBaseTYPE().equals(b.getBaseTYPE()))
       throw new RuntimeException("These two sets have different base type values.");
     this.a=a; this.b=b;
-    this.candidates = new PartialSolution[] { new PartialSolution(null)};
+    this.candidates = new PartialSolution[] { new PartialSolution(null, a, b)};
   }        
    
   public String toString(){ return this.candidates[0].toString();}
@@ -38,22 +38,17 @@ public class SetDiff extends Diff
         System.out.println(""+i+": "+this.candidates[i].getSim());
       System.out.println();
     }
-    // the initial state, the trace is null, outside refine is needed
     if(this.candidates[0].trace==null)
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
       return false;
     }
-    // the intermediate state, the trace is not null
-    // this.candidates[0].refine() is determined by the trace.refine()
-    // if the current EditOperation is Change, the trace.refine() return false
-    // which means one more inside refine step needs to do
     else if(!this.candidates[0].refine())
-    { Arrays.sort(this.candidates, simComparator);// sort the candidates after each inside refine step
+    { Arrays.sort(this.candidates, simComparator);
       return false;
     }
     else if (isFinal()){ return true;}    
-    else// when each edit operation has been completely refined, expand one more step
+    else
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
       return false;
@@ -91,113 +86,121 @@ public class SetDiff extends Diff
     for(int i=0; i < cands.length; i++)
       res[j++] = cands[i];
     return res;
+  } 
+  // append a deletion to an array of changes
+  private static PartialSolution[] addOne(PartialSolution[] changes, PartialSolution del)
+  { PartialSolution[] res = new PartialSolution[changes.length+1];
+    System.arraycopy(changes, 0, res, 0, changes.length);
+    res[changes.length]=del;
+    return res;
   }
  
   // inner class, i.e. it has implicit reference to ListDiff i.e. a, b
   private class PartialSolution  
   { private final Trace trace;
-    private PartialSolution(Trace trace){ this.trace = trace;}
-   
+    private final TypeSet remain_a;
+    private final TypeSet remain_b;
+
+    private PartialSolution(Trace trace, TypeSet remain_a, TypeSet remain_b)
+    { this.trace = trace; this.remain_a=remain_a; this.remain_b= remain_b;}
+
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
- 
-    public String toString(){ return "{"+(trace == null ? "" : trace.toString())+"}";}  
-    public String html()
-    { return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
-    public Sim getSim()
-    { return (trace == null ? Sim.UNKNOWN(SetDiff.this.a.weight()+
-                                          SetDiff.this.b.weight()) : trace.getSim());}
-        
+
+    public String toString(){ return "{"+(trace == null ? "" : trace.toString())+"}"+"? "+remain_a+", "+remain_b;}  
+    public String html(){ return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    public Sim getSim(){ return (trace == null ? Sim.UNKNOWN(SetDiff.this.a.weight()+
+                                                             SetDiff.this.b.weight()) : trace.getSim());}   
     public boolean refine(){ if(trace==null) return false; else return trace.refine();}        
     
     public PartialSolution delete()
-    { EditOperation op = new Delete(SetDiff.this.a.get(getSource()));
+    { TypeSet set_a = SetDiff.this.a;
+      EditOperation op = new Delete(SetDiff.this.a.get(getSource()));
       Trace trace = new Trace(this.trace, op);
-      return new PartialSolution(trace);
+      return new PartialSolution(trace, TypeSet.remove(set_a, getSource()), SetDiff.this.b);
     }        
     public PartialSolution insert()
-    { EditOperation op = new Insert(SetDiff.this.b.get(getTarget()));
+    { TypeSet set_b = SetDiff.this.b;
+      EditOperation op = new Insert(SetDiff.this.b.get(getTarget()));
       Trace trace = new Trace(this.trace, op);
-      return new PartialSolution(trace);
+      return new PartialSolution(trace, SetDiff.this.a, TypeSet.remove(set_b, getTarget()));
     }        
     public PartialSolution copy()
-    { EditOperation op = new Copy(SetDiff.this.b.get(getTarget()));
+    { TypeSet set_a = SetDiff.this.a;
+      TypeSet set_b = SetDiff.this.b;
+      EditOperation op = new Copy(SetDiff.this.b.get(getTarget()));
       Trace trace = new Trace(this.trace, op);
-      return new PartialSolution(trace);
+      return new PartialSolution(trace, TypeSet.remove(set_a, getSource()), TypeSet.remove(set_b, getTarget()));
     }      
-    public PartialSolution change()
-    { EditOperation op;
-      Trace trace;
+    public PartialSolution[] changes()
+    { TypeSet set_a = SetDiff.this.a;
+      TypeSet remain_a = TypeSet.remove(set_a, getSource());
+      TypeSet set_b = SetDiff.this.b;
+
+      int b_size = SetDiff.this.b.size();
+      EditOperation[] op = new EditOperation[b_size];
+      Trace[] trace = new Trace[b_size];
+      PartialSolution[] changes = new PartialSolution[b_size];
+
       TYPE baseTYPE = a.getBaseTYPE();
-      if(baseTYPE.isUNIT()||baseTYPE.isBOOL()||baseTYPE.isCHAR()||baseTYPE.isNAT()||baseTYPE.isINT()) 
-      { op= new Change(new PrimDiff(SetDiff.this.a.get(getSource()), 
-                                    SetDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isSTRING())
-      { op= new Change(new PrimStringDiff((PrimString)SetDiff.this.a.get(getSource()), 
-                                          (PrimString)SetDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isPRODUCT()) 
-      { op= new Change(new ProductDiff((TypeProduct)SetDiff.this.a.get(getSource()), 
-                                       (TypeProduct)SetDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isUNION()) 
-      { op= new Change(new UnionDiff((TypeUnion)SetDiff.this.a.get(getSource()), 
-                                     (TypeUnion)SetDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isLIST())
-      { op= new Change(new ListDiff((TypeList)SetDiff.this.a.get(getSource()), 
-                                    (TypeList)SetDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isSET())
-      { op= new Change(new SetDiff((TypeSet)SetDiff.this.a.get(getSource()), 
-                                   (TypeSet)SetDiff.this.b.get(getTarget())));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else throw new RuntimeException("More Types need to be explored.");
-    }        
-    private PartialSolution[] expand()
-    { if(SetDiff.this.b.size() == getSource())
-      { if(SetDiff.this.a.size() == getTarget()) return new PartialSolution[0];
-        else return new PartialSolution[]{ delete()};
-      }
-      else if(SetDiff.this.a.size() == getSource()) 
-             return new PartialSolution[]{ insert()};
-      else if(SetDiff.this.a.get(getSource()).weight()==0) 
-             return new PartialSolution[]{ delete(), insert()};// delete an empty line 
-      else if(SetDiff.this.b.get(getTarget()).weight()==0) 
-             return new PartialSolution[]{ delete(), insert()};// insert an empty line
-      else return new PartialSolution[]{ change(), insert(), delete()};
-    }        
-    private PartialSolution[] allChanges()
-    { ?????
-    }
-    private PartialSolution[] allDeletion()
-    { int a_size = SetDiff.this.a.size();
-      PartialSolution[] deletions = new PartialSolution[a_size];
-      for(int i=0; i<a_size; i++)
-        deletions[i] = delete();
-      return deletions;
-    }
-    private PartialSolution[] allInsertion()
-    { int b_size = SetDiff.this.b.size();
-      PartialSolution[] insertions = new PartialSolution[b_size];
+
       for(int i=0; i<b_size; i++)
-        insertions[i] = insert(); 
-      return insertions;
-    }    
- 
+      { System.out.println("Why this b changed ?????? SetDiff.this.b="+SetDiff.this.b);
+        if(baseTYPE.isUNIT()||baseTYPE.isBOOL()||baseTYPE.isCHAR()||baseTYPE.isNAT()||baseTYPE.isINT()) 
+        { op[i]= new Change(new PrimDiff(set_a.get(getSource()), set_b.get(i)));
+          System.out.println("In loop: set_b.get("+i+")="+set_b.get(i));
+          trace[i] = new Trace(this.trace, op[i]);
+          changes[i]= new PartialSolution(trace[i], remain_a, TypeSet.remove(set_b, i));
+          System.out.println("In loop: ("+i+") set_b="+set_b);
+        }
+        else if(baseTYPE.isSTRING())
+        { op[i]= new Change(new PrimStringDiff((PrimString)SetDiff.this.a.get(getSource()), 
+                                            (PrimString)SetDiff.this.b.get(i)));
+          trace[i] = new Trace(this.trace, op[i]);
+          changes[i]= new PartialSolution(trace[i], remain_a, TypeSet.remove(set_b, i));
+        }
+        else if(baseTYPE.isPRODUCT()) 
+        { op[i]= new Change(new ProductDiff((TypeProduct)SetDiff.this.a.get(getSource()), 
+                                         (TypeProduct)SetDiff.this.b.get(i)));
+          trace[i] = new Trace(this.trace, op[i]);
+          changes[i]= new PartialSolution(trace[i], remain_a, TypeSet.remove(set_b, i));
+        }
+        else if(baseTYPE.isUNION()) 
+        { op[i]= new Change(new UnionDiff((TypeUnion)SetDiff.this.a.get(getSource()), 
+                                       (TypeUnion)SetDiff.this.b.get(i)));
+          trace[i] = new Trace(this.trace, op[i]);
+          changes[i]= new PartialSolution(trace[i], remain_a, TypeSet.remove(set_b, i));
+        }
+        else if(baseTYPE.isLIST())
+        { op[i]= new Change(new ListDiff((TypeList)SetDiff.this.a.get(getSource()), 
+                                         (TypeList)SetDiff.this.b.get(i)));
+          trace[i] = new Trace(this.trace, op[i]);
+          changes[i]= new PartialSolution(trace[i], remain_a, TypeSet.remove(set_b, i));
+        }
+        else if(baseTYPE.isSET())
+        { op[i]= new Change(new SetDiff((TypeSet)SetDiff.this.a.get(getSource()), 
+                                     (TypeSet)SetDiff.this.b.get(i)));
+          trace[i] = new Trace(this.trace, op[i]);
+          changes[i]= new PartialSolution(trace[i], remain_a, TypeSet.remove(set_b, i));
+        }
+        else throw new RuntimeException("More Types need to be explored.");
+      }
+      return candidates;
+    }
+    private PartialSolution[] expand()
+    { int a_size = SetDiff.this.a.size();
+      int b_size = SetDiff.this.b.size();
+     
+      if(a_size == 0 && b_size == 0) return new PartialSolution[0];
+      else if(a_size > 0 && b_size == 0) return new PartialSolution[]{ delete()};
+      else if(a_size == 0 && b_size > 0) return new PartialSolution[]{ insert()};
+      else if(SetDiff.this.a.weight() == 1 && SetDiff.this.b.weight() == 1)// if they primitive type value
+      { if(SetDiff.this.a.get(0).equals(SetDiff.this.b.get(0))) 
+          return new PartialSolution[]{ copy()};
+        else return new PartialSolution[] { delete(), insert()};
+      }
+      else return addOne(changes(), delete());
+    }        
     // Get the last copy operation position
     public int getStopper(Trace trace)
     { if(trace == null) return -1;

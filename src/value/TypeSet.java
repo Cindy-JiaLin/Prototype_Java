@@ -42,6 +42,12 @@ public class TypeSet extends TypeT
   public List<TypeT> getValue(){ return this.set;}
   public int size(){ return this.set.size();} 
   public TypeT get(int i){ return this.set.get(i);}
+
+  public static TypeSet remove(TypeSet givenSet, int i)// remove the ith element in this set
+  { List<TypeT> res = givenSet.getValue();
+    res.remove(i);
+    return new TypeSet(givenSet.getBaseTYPE(), res);
+  } 
   public boolean isEmptySet(){ return this.set.isEmpty();}
 
   public TYPE typeOf(){ return TYPE.SET(this.baseTYPE);} 
@@ -64,5 +70,5 @@ public class TypeSet extends TypeT
     } 
     else throw new RuntimeException("TYPE of this element "+a+
                                     " is different from the expected type"+this.baseTYPE);
-  } 
+  }
 }
