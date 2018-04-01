@@ -67,5 +67,6 @@ public final class HTML
   public static String DEL(char c){ return "<span style=\"background-color:#ffcccc;\">"+encode(c)+"</span>";}
   public static String INS(char c){ return "<span style=\"background-color:#ccffcc;\">"+encode(c)+"</span>";}
   public static String CHG(char c){ return "<span style=\"background-color:#ccccff;\">"+encode(c)+"</span>";}
+  public static String CPY(char c){ return "<span stype=\"background-color:#eeeeee;\">"+encode(c)+"</span>";}
 
  }

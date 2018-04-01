@@ -1,6 +1,7 @@
 package diff;
 
 import sim.Sim;
+import dcprototype.Console;
 import dcprototype.HTML;
 import dcprototype.Main;
 import dcprototype.Options;
@@ -19,7 +20,8 @@ public class PrimStringDiff extends Diff
  
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
-  public Sim getSim(){ return this.candidates[0].getSim();}       
+  public Sim getSim(){ return this.candidates[0].getSim();}  
+  public PartialSolution getFirstCand(){ return this.candidates[0];}     
   
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
   
@@ -27,13 +29,7 @@ public class PrimStringDiff extends Diff
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
   public boolean refine()
   { if (Main.VERBOSE || VERBOSE) System.out.println(this.candidates[0]);
-    if (isFinal())
-    { if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-        System.out.println(this.candidates[0]);
-      if(Main.SIM || SIM) 
-        System.out.println(this.candidates[0].getSim().getPercentage());
-      return true;
-    }    
+    if (isFinal()){ return true;}    
     else
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
       return false;
@@ -81,8 +77,9 @@ public class PrimStringDiff extends Diff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}   
  
-    public String toString()
-    { return "["+(trace == null ? "" : trace.toString())+"?"+PrimStringDiff.this.a.substring(getSource())+"?"+PrimStringDiff.this.b.substring(getTarget())+"]"+getSim();}  
+    public String toString(){ return (trace == null ? "" : trace.toString());}
+    //{ return "["+(trace == null ? "" : trace.toString())+"?"+PrimStringDiff.this.a.substring(getSource())+"?"+PrimStringDiff.this.b.substring(getTarget())+"]"+getSim();}
+    public String beautify(){ return (trace == null ? "" : trace.toString());}
     public String html(){ return (trace == null ? "" : trace.html());}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(PrimStringDiff.this.a.weight()+PrimStringDiff.this.b.weight()) : trace.getSim());}
@@ -178,7 +175,7 @@ public class PrimStringDiff extends Diff
   private final static class Insert extends EditOperation
   { private final char c;
     public Insert(char c){ this.c=c;}
-    public String toString(){ return "+"+c;}
+    public String toString(){ return Console.ins(""+c);}
     public String html(){ return HTML.INS(c);}
 
     public Sim calculate(Sim sim){ return sim.dec(1);}
@@ -188,7 +185,7 @@ public class PrimStringDiff extends Diff
   private final static class Delete extends EditOperation
   { private final char c;
     public Delete(char c){ this.c=c;}
-    public String toString(){ return "-"+c;}
+    public String toString(){ return Console.del(""+c);}
     public String html(){ return HTML.DEL(c);}
 
     public Sim calculate(Sim sim){ return sim.dec(1);}
@@ -198,8 +195,8 @@ public class PrimStringDiff extends Diff
   private final static class Copy extends EditOperation
   { private final char c;
     public Copy(char c){ this.c=c;}
-    public String toString(){ return "="+c;}
-    public String html(){ return HTML.encode(c);}
+    public String toString(){ return ""+c;}
+    public String html(){ return HTML.CPY(c);}
 
     public Sim calculate(Sim sim){ return sim.inc(2);}
     public int nextA(int ia){ return ia+1;}
@@ -242,6 +239,10 @@ public class PrimStringDiff extends Diff
     { PrimStringDiff diff = new PrimStringDiff(new PrimString(TYPE.STRING, source), 
                                                new PrimString(TYPE.STRING, target));
       for(; !diff.refine(); );
+      if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
+        System.out.println(diff.getFirstCand().beautify());
+      if(Main.SIM || SIM) 
+        System.out.println(diff.getSim().getPercentage());
     }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;

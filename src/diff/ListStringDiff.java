@@ -11,6 +11,7 @@ import sim.Sim;
 import type.TYPE;
 import value.PrimString;
 
+import dcprototype.Console;
 import dcprototype.Options;
 import dcprototype.HTML;
 
@@ -37,7 +38,8 @@ public class ListStringDiff
 
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
-  public Sim getSim(){ return this.candidates[0].getSim();}  
+  public Sim getSim(){ return this.candidates[0].getSim();}
+  public PartialSolution getFirstCand(){ return this.candidates[0];}  
   // lwb==upb
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
 
@@ -62,12 +64,7 @@ public class ListStringDiff
     { Arrays.sort(this.candidates, simComparator);// sort the candidates after each inside refine step
       return false;
     }
-    else if (isFinal())
-    { if(!VERBOSE && DIFF) System.out.println(this.candidates[0]);
-      if(HTMLCODE) writeHTML(this.candidates[0]);
-      if(SIM) System.out.println(this.candidates[0].getSim().getPercentage());
-      return true;
-    }    
+    else if (isFinal()){ return true;}    
     else// when each edit operation has been completely refined, expand one more step
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
@@ -116,7 +113,8 @@ public class ListStringDiff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
  
-    public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
+    public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}
+    public String beautify(){ return (trace == null ? "" : trace.toString());}  
     public String html(){ return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim(){ return (trace == null ? Sim.UNKNOWN(ListStringDiff.this.a.size()+ListStringDiff.this.b.size()) : trace.getSim());}
         
@@ -207,7 +205,7 @@ public class ListStringDiff
       this.ib = op.nextB(trace == null ? 0 : trace.ib);
       this.sim = op.calculate(trace == null ? ListStringDiff.this.getUnknown() :  trace.getSim());
     }        
-    public String toString(){ return (this.trace ==  null ? "" : this.trace.toString())+this.op;}
+    public String toString(){ return (this.trace ==  null ? "" : this.trace.toString())+this.op+"\n";}
     public String html(){ return(this.trace != null ? this.trace.html() : "")+HTML.TR(op.html(ia,ib));}
     public Sim getSim(){ return this.sim;}
 
@@ -231,7 +229,7 @@ public class ListStringDiff
   private final static class Insert extends EditOperation
   { private final String c;
     public Insert(String c){ this.c=c;}
-    public String toString(){ return "+"+c;}
+    public String toString(){ return Console.ins(""+c);}
     public String html(int ia, int ib)
     { return HTML.TD("")+
              HTML.TD(HTML.INS,ib)+
@@ -246,7 +244,7 @@ public class ListStringDiff
   private final static class Delete extends EditOperation
   { private final String c;
     public Delete(String c){ this.c=c;}
-    public String toString(){ return "-"+c;}
+    public String toString(){ return Console.del(""+c);}
     public String html(int ia, int ib)
     { return HTML.TD("")+
              HTML.TD(HTML.DEL,ia)+
@@ -261,7 +259,7 @@ public class ListStringDiff
   private final static class Copy extends EditOperation
   { private final String c;
     public Copy(String c){ this.c=c;}
-    public String toString(){ return "="+c;}
+    public String toString(){ return ""+c;}
     public String html(int ia, int ib)
     { return HTML.TD(HTML.CPY,ia)+
              HTML.TD(HTML.CPY,ib)+
@@ -276,7 +274,7 @@ public class ListStringDiff
   private final static class Change extends EditOperation
   { private final PrimStringDiff diff;
     public Change(PrimStringDiff diff){ this.diff=diff;}
-    public String toString(){ return "!"+diff;}
+    public String toString(){ return Console.chg(""+diff);}
     public String html(int ia, int ib)
     { return HTML.TD(HTML.CHG,ia)+
              HTML.TD(HTML.CHG,ib)+
@@ -333,6 +331,9 @@ public class ListStringDiff
     if(source!=null && target!=null)
     { ListStringDiff diff = new ListStringDiff(source, target);
       for(; !diff.refine(); );
+      if(!VERBOSE && DIFF) System.out.println(diff.getFirstCand().beautify());
+      if(HTMLCODE) writeHTML(diff.getFirstCand());
+      if(SIM) System.out.println(diff.getSim().getPercentage());
     } 
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
