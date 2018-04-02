@@ -39,7 +39,7 @@ public class ListStringDiff
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}
-  public PartialSolution getFirstCand(){ return this.candidates[0];}  
+  public PartialSolution getSolution(){ return this.candidates[0];}  
   // lwb==upb
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
 
@@ -331,8 +331,8 @@ public class ListStringDiff
     if(source!=null && target!=null)
     { ListStringDiff diff = new ListStringDiff(source, target);
       for(; !diff.refine(); );
-      if(!VERBOSE && DIFF) System.out.println(diff.getFirstCand().beautify());
-      if(HTMLCODE) writeHTML(diff.getFirstCand());
+      if(!VERBOSE && DIFF) System.out.println(diff.getSolution());
+      if(HTMLCODE) writeHTML(diff.getSolution());
       if(SIM) System.out.println(diff.getSim().getPercentage());
     } 
     final long endTime   = System.currentTimeMillis();

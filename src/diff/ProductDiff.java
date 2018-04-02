@@ -29,7 +29,8 @@ public class ProductDiff extends Diff
 
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
-  public Sim getSim(){ return this.candidates[0].getSim();}  
+  public Sim getSim(){ return this.candidates[0].getSim();}
+  public PartialSolution getSolution(){ return this.candidates[0];}  
 
   public PartialSolution getFirstCand(){ return this.candidates[0];}
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
@@ -235,7 +236,7 @@ public class ProductDiff extends Diff
   private final static class Insert extends EditOperation
   { private final TypeT c;
     public Insert(TypeT c){ this.c=c;}
-    public String toString(){ return "+"+c;}
+    public String toString(){ return Console.ins(""+c);}
     
     public String html(int ia, int ib)
     { return HTML.TD("")+
@@ -251,7 +252,7 @@ public class ProductDiff extends Diff
   private final static class Delete extends EditOperation
   { private final TypeT c;
     public Delete(TypeT c){ this.c=c;}
-    public String toString(){ return "-"+c;}
+    public String toString(){ return Console.del(""+c);}
     public String html(int ia, int ib)
     { return HTML.TD("")+
              HTML.TD(HTML.DEL,ia)+
@@ -281,7 +282,7 @@ public class ProductDiff extends Diff
   private final static class Change extends EditOperation
   { private final Diff diff;
     public Change(Diff diff){ this.diff=diff;}
-    public String toString(){ return ""+diff;}
+    public String toString(){ return Console.chg(""+diff);}
     public String html(int ia, int ib)
     { if(diff instanceof PrimDiff)
       { return HTML.TD(HTML.CHG,ia)+
@@ -391,8 +392,8 @@ public class ProductDiff extends Diff
     { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
       for(; !diff.refine(); );
       if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-      System.out.println(diff.getFirstCand());
-      if(HTMLCODE) writeHTML(diff.getFirstCand());
+      System.out.println(diff.getSolution());
+      if(HTMLCODE) writeHTML(diff.getSolution());
       if(Main.SIM||SIM) 
       System.out.println(diff.getSim().getPercentage());
     }

@@ -1,6 +1,0 @@
-Improve from DC6
-
-1. Colourful result in Console. PrimStringDiff.java and ListStringDiff.java
-
-
-

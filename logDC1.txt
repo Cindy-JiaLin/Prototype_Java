@@ -1,5 +1,0 @@
-StringDiff and ListDiff is the same from the directory StringDiff5
-
-From this DC1, I start to write Diff for other data types.
-
-Suppose the type system only contains PrimChar, PrimString and TypeList

@@ -2,6 +2,8 @@ package dcprototype;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ public class Main
   public static boolean DIFF = false;// displays difference as a solution (PartialSolution) 
   public static boolean INFO = false;// displays runtime statistics
     
-  public static void main(String[] args) 
+  public static void main(String[] args) throws UnsupportedEncodingException
   { final long startTime = System.currentTimeMillis();
     if(Options.isSet(args, "-verbose")) { VERBOSE = true; args = Options.remove(args, "-verbose");}
     if(Options.isSet(args, "-sim")) { SIM = true; args = Options.remove(args, "-sim");}
@@ -72,9 +74,14 @@ public class Main
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { if(resTYPE.isUNIT()||resTYPE.isBOOL()||resTYPE.isCHAR()||resTYPE.isNAT()||resTYPE.isINT())
+    { if(resTYPE.isUNIT()||resTYPE.isBOOL()||resTYPE.isCHAR()||
+         resTYPE.isNAT()||resTYPE.isINT()||resTYPE.isREAL())
       { PrimDiff diff = new PrimDiff(resV1, resV2);
         for(; !diff.refine(); );
+        if(!(VERBOSE) && (DIFF)) 
+           Encoding.printUnicode(""+diff.getSolution());
+        if(SIM) 
+           System.out.println(diff.getSim().getPercentage());
       }
       else if(resTYPE.isSTRING())
       { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
@@ -84,7 +91,7 @@ public class Main
       { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);
         for(; !diff.refine(); );
         if(!(VERBOSE) && (DIFF)) 
-           System.out.println(diff.getFirstCand());
+           System.out.println(diff.getSolution());
         if(SIM) 
           System.out.println(diff.getSim().getPercentage());
       }
@@ -92,7 +99,7 @@ public class Main
       { UnionDiff diff = new UnionDiff((TypeUnion)resV1, (TypeUnion)resV2);
         for(; !diff.refine(); );
         if(!(VERBOSE) && (DIFF)) 
-           System.out.println(diff.getFirstCand());
+           System.out.println(diff.getSolution());
         if(SIM) 
           System.out.println(diff.getSim().getPercentage());
       }
@@ -100,7 +107,7 @@ public class Main
       { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
         for(; !diff.refine(); );
         if(!(VERBOSE) && (DIFF)) 
-           System.out.println(diff.getFirstCand());
+           System.out.println(diff.getSolution());
         if(SIM) 
           System.out.println(diff.getSim().getPercentage());
       }
@@ -108,7 +115,7 @@ public class Main
       { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
         for(; !diff.refine(); );
         if(!(VERBOSE) && (DIFF)) 
-           System.out.println(diff.getFirstCand());
+           System.out.println(diff.getSolution());
         if(SIM) 
           System.out.println(diff.getSim().getPercentage());
       }

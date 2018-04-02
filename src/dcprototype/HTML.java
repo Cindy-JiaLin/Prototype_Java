@@ -69,4 +69,10 @@ public final class HTML
   public static String CHG(char c){ return "<span style=\"background-color:#ccccff;\">"+encode(c)+"</span>";}
   public static String CPY(char c){ return "<span stype=\"background-color:#eeeeee;\">"+encode(c)+"</span>";}
 
+  public static String DEL(String s){ return "<span style=\"background-color:#ffcccc;\">"+encode(s)+"</span>";}
+  public static String INS(String s){ return "<span style=\"background-color:#ccffcc;\">"+encode(s)+"</span>";}
+  public static String CHG(String s){ return "<span style=\"background-color:#ccccff;\">"+encode(s)+"</span>";}
+  public static String CPY(String s){ return "<span stype=\"background-color:#eeeeee;\">"+encode(s)+"</span>";}
+
+
  }

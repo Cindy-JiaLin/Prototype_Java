@@ -28,7 +28,7 @@ public class ListDiff extends Diff
   public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}  
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
-  public PartialSolution getFirstCand(){ return this.candidates[0];}
+  public PartialSolution getSolution(){ return this.candidates[0];}
 
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
   public boolean refine()
@@ -402,8 +402,8 @@ public class ListDiff extends Diff
     { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
       for(; !diff.refine(); );
       if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-      System.out.println(diff.getFirstCand());
-      if(HTMLCODE) writeHTML(diff.getFirstCand());
+      System.out.println(diff.getSolution());
+      if(HTMLCODE) writeHTML(diff.getSolution());
       if(Main.SIM||SIM) 
       System.out.println(diff.getSim().getPercentage());    
     }

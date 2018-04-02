@@ -21,7 +21,7 @@ public class PrimStringDiff extends Diff
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}  
-  public PartialSolution getFirstCand(){ return this.candidates[0];}     
+  public PartialSolution getSolution(){ return this.candidates[0];}     
   
   public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
   
@@ -240,7 +240,7 @@ public class PrimStringDiff extends Diff
                                                new PrimString(TYPE.STRING, target));
       for(; !diff.refine(); );
       if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-        System.out.println(diff.getFirstCand().beautify());
+        System.out.println(diff.getSolution());
       if(Main.SIM || SIM) 
         System.out.println(diff.getSim().getPercentage());
     }
