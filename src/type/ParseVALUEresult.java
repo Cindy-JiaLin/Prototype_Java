@@ -169,7 +169,7 @@ public class ParseVALUEresult
         if(endIndex1==-1) 
           throw new RuntimeException("Please provide product values with ')' at the end");
         String strBeforeEnd=str.substring(0, endIndex1);
-        int eqIndex1 = strBeforeEnd.indexOf("=");
+        int eqIndex1 = strBeforeEnd.indexOf(".");// was =
         if(eqIndex1==-1)// this value has no label
         { if(!T.getLabels().get(0).equals(NOLABEL)) 
             throw new RuntimeException("This label="+NOLABEL+
@@ -187,7 +187,7 @@ public class ParseVALUEresult
         else// this value has label
         { label1 = str.substring(0, eqIndex1);
           str=cutoff(str, label1);
-          str=cutoff(str, "=");
+          str=cutoff(str, ".");// was =
           if(!T.getLabels().get(0).equals(label1)) 
             throw new RuntimeException("This label="+label1+
                                        "does not matching the first label in "+T);
@@ -204,7 +204,7 @@ public class ParseVALUEresult
       }
       else// this PRODUCT value has more than one components
       { String strBeforeComma=str.substring(0, commaIndex1);
-        int eqIndex1 = strBeforeComma.indexOf("=");
+        int eqIndex1 = strBeforeComma.indexOf(".");// was =
         if(eqIndex1==-1)// this value has no label
         { if(!T.getLabels().get(0).equals(NOLABEL)) 
             throw new RuntimeException("This label="+NOLABEL+
@@ -222,7 +222,7 @@ public class ParseVALUEresult
         else// this value has label
         { label1 = str.substring(0, eqIndex1);
           str=cutoff(str, label1);
-          str=cutoff(str, "=");
+          str=cutoff(str, ".");// was =
           if(!T.getLabels().get(0).equals(label1)) 
             throw new RuntimeException("This label="+label1+
                                        "does not matching the first label in "+T);
@@ -247,7 +247,7 @@ public class ParseVALUEresult
           if(endIndex==-1) 
             throw new RuntimeException("Please provide product values with ')' at the end");
           String strBeforeEnd=str.substring(0, endIndex);
-          int eqIndex = strBeforeEnd.indexOf("=");
+          int eqIndex = strBeforeEnd.indexOf(".");// was =
           if(eqIndex==-1)// this value has no label
           { if(!T.getLabels().get(i).equals(NOLABEL)) 
               throw new RuntimeException("This label="+NOLABEL+
@@ -265,7 +265,7 @@ public class ParseVALUEresult
           else// this value has label
           { label = str.substring(0, eqIndex);
             str=cutoff(str, label);
-            str=cutoff(str, "=");
+            str=cutoff(str, ".");// was =
             if(!T.getLabels().get(i).equals(label)) 
               throw new RuntimeException("This label="+label+
                                          "does not matching the "+(i+1)+" label in "+T);
@@ -282,7 +282,7 @@ public class ParseVALUEresult
         }
         else// has more components
         { String strBeforeComma=str.substring(0, commaIndex);
-          int eqIndex = strBeforeComma.indexOf("=");
+          int eqIndex = strBeforeComma.indexOf(".");// was =
           if(eqIndex==-1)// this value has no label
           { if(!T.getLabels().get(i).equals(NOLABEL)) 
               throw new RuntimeException("This label="+NOLABEL+
@@ -300,7 +300,7 @@ public class ParseVALUEresult
           else// this value has label
           { label = str.substring(0, eqIndex);
             str=cutoff(str, label);
-            str=cutoff(str, "=");
+            str=cutoff(str, ".");// was =
             if(!T.getLabels().get(i).equals(label)) 
               throw new RuntimeException("This label="+label+
                                          "does not matching the "+(i+1)+" label in "+T);

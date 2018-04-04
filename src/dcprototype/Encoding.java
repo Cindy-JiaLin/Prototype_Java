@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
 public class Encoding 
-{
+{ 
   public final static String UNIT=new String(Character.toChars(0x1D54C));
   public final static String BOOL=new String(Character.toChars(0x1D539));
   public final static String CHAR="\u2102";

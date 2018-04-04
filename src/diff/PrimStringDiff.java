@@ -28,7 +28,12 @@ public class PrimStringDiff extends Diff
   // lwb==upb
   public boolean isFinal(){ return this.candidates[0].getSim().isFinal();}
   public boolean refine()
-  { if (Main.VERBOSE || VERBOSE) System.out.println(this.candidates[0]);
+  { if (Main.VERBOSE || VERBOSE)
+    { for(int i=0; i<this.candidates.length; i++)
+       System.out.println("["+i+"]"+this.candidates[i]);
+      System.out.println("\n"); 
+    }
+    // System.out.println(this.candidates[0]);
     if (isFinal()){ return true;}    
     else
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
@@ -78,7 +83,7 @@ public class PrimStringDiff extends Diff
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}   
  
     public String toString(){ return (trace == null ? "" : trace.toString());}
-    //{ return "["+(trace == null ? "" : trace.toString())+"?"+PrimStringDiff.this.a.substring(getSource())+"?"+PrimStringDiff.this.b.substring(getTarget())+"]"+getSim();}
+    //{ return "\""+(trace == null ? "" : trace.toString())+"?"+PrimStringDiff.this.a.substring(getSource())+"?"+PrimStringDiff.this.b.substring(getTarget())+"\""+getSim();}
     public String beautify(){ return (trace == null ? "" : trace.toString());}
     public String html(){ return (trace == null ? "" : trace.html());}
     public Sim getSim()

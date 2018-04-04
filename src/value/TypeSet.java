@@ -43,10 +43,10 @@ public class TypeSet extends TypeT
   public int size(){ return this.set.size();} 
   public TypeT get(int i){ return this.set.get(i);}
 
-  public static TypeSet remove(TypeSet givenSet, int i)// remove the ith element in this set
-  { List<TypeT> res = givenSet.getValue();
+  public TypeSet remove(int i)// remove the ith element in this set
+  { List<TypeT> res = this.set;
     res.remove(i);
-    return new TypeSet(givenSet.getBaseTYPE(), res);
+    return new TypeSet(this.baseTYPE, res);
   } 
   public boolean isEmptySet(){ return this.set.isEmpty();}
 

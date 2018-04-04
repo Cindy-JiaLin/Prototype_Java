@@ -86,6 +86,10 @@ public class Main
       else if(resTYPE.isSTRING())
       { PrimStringDiff diff = new PrimStringDiff((PrimString)resV1, (PrimString)resV2);
         for(; !diff.refine(); );
+        if(!(VERBOSE) && (DIFF)) 
+           Encoding.printUnicode(""+diff.getSolution());
+        if(SIM) 
+           System.out.println(diff.getSim().getPercentage());
       }
       else if(resTYPE.isPRODUCT())
       { ProductDiff diff = new ProductDiff((TypeProduct)resV1, (TypeProduct)resV2);

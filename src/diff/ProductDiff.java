@@ -213,7 +213,7 @@ public class ProductDiff extends Diff
     }        
     public String toString()
     { String label=ProductDiff.this.a.getLabels().get(ia-1);
-      return (this.trace ==  null ? "" : this.trace.toString())+(label.equals("nolabel") ? "" : label+"")+this.op+(ProductDiff.this.a.size()==ia ? "" : ", ");
+      return (this.trace ==  null ? "" : this.trace.toString())+(label.equals("nolabel") ? "" : label+".")+this.op+(ProductDiff.this.a.size()==ia ? "" : ",\n");
     }
     public String html()
     { return(this.trace != null ? this.trace.html() : "")+HTML.TR(op.html(ia,ib));}

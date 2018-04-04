@@ -1,0 +1,5 @@
+{menu.{id.String*
+       value.String*
+       popup.{menuitem.List({value.String*onclick.String})}
+      }
+}
