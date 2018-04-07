@@ -103,7 +103,7 @@ public class ProductDiff extends Diff
  
     public String toString(){ return "("+(trace == null ? "" : trace.toString())+")";}  
     public String html()
-    { return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    { return HTML.TR("("+trace.html()+")"+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(ProductDiff.this.a.weight()+
                                           ProductDiff.this.b.weight()) : trace.getSim());}
@@ -216,7 +216,8 @@ public class ProductDiff extends Diff
       return (this.trace ==  null ? "" : this.trace.toString())+(label.equals("nolabel") ? "" : label+".")+this.op+(ProductDiff.this.a.size()==ia ? "" : ",\n");
     }
     public String html()
-    { return(this.trace != null ? this.trace.html() : "")+HTML.TR(op.html(ia,ib));}
+    { String label=ProductDiff.this.a.getLabels().get(ia-1);
+      return(this.trace != null ? this.trace.html() : "")+HTML.TR((label.equals("nolabel") ? "" : label+".")+op.html(ia,ib)+",");}
     public Sim getSim(){ return this.sim;}
 
     public boolean refine()
@@ -285,33 +286,33 @@ public class ProductDiff extends Diff
     public String toString(){ return Console.chg(""+diff);}
     public String html(int ia, int ib)
     { if(diff instanceof PrimDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((PrimDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        //(SIM ? HTML.TD(""+((PrimDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimDiff)diff).html());
       }
       else if(diff instanceof PrimStringDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        //(SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimStringDiff)diff).html());
       }
       else if(diff instanceof ProductDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        //(SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ProductDiff)diff).html());
       }
       else if(diff instanceof UnionDiff)
       { return HTML.TD(HTML.CHG,ia)+
                HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((UnionDiff)diff).getSim().getPercentage1()+" ") : "")+
+        //(SIM ? HTML.TD(""+((UnionDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((UnionDiff)diff).html());
       }
       else if(diff instanceof ListDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        //(SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ListDiff)diff).html());
       }
       else throw new RuntimeException("Currently, there is no other diff.");

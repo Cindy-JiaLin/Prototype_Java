@@ -25,10 +25,8 @@ public final class Sim implements Comparable<Sim>
     else return (isUnknown() ? "[0,1]" : "["+this.dlwb+"/"+this.den+","+this.dupb+"/"+this.den+"]");
   }
   
-  public int getDecrement(){ return den-num2;}
-  public int getIncrement(){ return num1;}
-  public double getDecrementReal(){ return den-dupb;}
-  public double getIncrementReal(){ return dlwb;}
+  public int getDecrement(){ if(discrete) return den-num2; else return den-dupb;}
+  public int getIncrement(){ if(discrete) return num1; else return dlwb;}
   
   public final static Sim UNKNOWN(int n){ return new Sim(0,n,n);}
 
@@ -87,8 +85,8 @@ public final class Sim implements Comparable<Sim>
       else return getPercentage(num1,den)+".."+getPercentage(num2,den);
     }
     else
-    { if(Math.abs(dlwb-den)<1.0E-8) return "100%";
-      else return getPercentage(dlwb,den);
+    { if(Math.abs(dlwb-dupb)<1.0E-8) return "100%";
+      else return getPercentage(dupb,den)+".."+getPercentage(dupb,den);
     }
   } 
   public String getPercentage1()
@@ -97,8 +95,8 @@ public final class Sim implements Comparable<Sim>
       else return getPercentage(num1,den)+".."+getPercentage(num2,den);
     }
     else
-    { if(Math.abs(dlwb-den)<1.0E-8) return "100%";
-      else return getPercentage1(dlwb,den);
+    { if(Math.abs(dlwb-dupb)<1.0E-8) return "100%";
+      else return getPercentage1(dupb,den)+".."+getPercentage1(dupb,den);
     }
   }         
   public String getPercentage0()
@@ -107,8 +105,8 @@ public final class Sim implements Comparable<Sim>
       else return getPercentage(num1,den)+".."+getPercentage(num2,den);
     }
     else
-    { if(Math.abs(dlwb-den)<1.0E-8) return "100%";
-      else return getPercentage0(dlwb,den);
+    { if(Math.abs(dlwb-dupb)<1.0E-8) return "100%";
+      else return getPercentage0(dupb,den)+".."+getPercentage0(dupb,den);
     }
 
   } 
@@ -151,7 +149,7 @@ public final class Sim implements Comparable<Sim>
       { double tu = this.dupb*sim.den; // tl -- this.dlwb, tu -- this.dupb
         double su = sim.dupb*this.den; // sl -- sim.dlwb, su -- sim.dupb
         if(tu<su) return -1;
-        else if(tu>su) return +1;
+        else if(tu>su) return +1
         else
         { double tl = this.dlwb*sim.den;
           double sl = sim.dlwb*this.den;

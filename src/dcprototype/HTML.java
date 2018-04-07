@@ -54,6 +54,7 @@ public final class HTML
     else if(c=='>') return "&gt;";
     else if(c=='&') return "&amp;";
     else if(c==' ') return "&nbsp;";
+    else if(c=='~') return "&asymp;";
     else return ""+c;
   }
   

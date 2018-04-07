@@ -103,7 +103,7 @@ public class ListDiff extends Diff
  
     public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
     public String html()
-    { return HTML.TABLE(trace.html()+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    { return HTML.TABLE(trace.html());}//+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(ListDiff.this.a.weight()+
                                           ListDiff.this.b.weight()) : trace.getSim());}
@@ -301,15 +301,15 @@ public class ListDiff extends Diff
                HTML.TD(HTML.CHG, ((PrimDiff)diff).html());
       }
       else if(diff instanceof PrimStringDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        //(SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimStringDiff)diff).html());
       }
       else if(diff instanceof ProductDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+         //(SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ProductDiff)diff).html());
       }
       else if(diff instanceof UnionDiff)
@@ -319,9 +319,9 @@ public class ListDiff extends Diff
                HTML.TD(HTML.CHG, ((UnionDiff)diff).html());
       }
       else if(diff instanceof ListDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        (SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        //(SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ListDiff)diff).html());
       }
       else throw new RuntimeException("Currently, there is no other diff.");
