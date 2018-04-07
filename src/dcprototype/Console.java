@@ -5,6 +5,7 @@ public class Console
   private final static int DEL=207;
   private final static int INS=118;
   private final static int CHG=39;
+  private final static int CPY=7;
 
   private static String code(int n) { return " "+(""+(1000+n)).substring(1)+" "; }
   private static String color(int n) { return CSI+"48;5;"+n+";1m"+code(n); }
@@ -12,6 +13,7 @@ public class Console
   public static String del(String s) { return CSI+"48;5;"+DEL+";1m"+s+RESET; }
   public static String ins(String s) { return CSI+"48;5;"+INS+";1m"+s+RESET; }
   public static String chg(String s) { return CSI+"48;5;"+CHG+";1m"+s+RESET; }
+  public static String cpy(String s) { return CSI+"48;5;"+CPY+";1m"+s+RESET; }
 
   private static final String CSI="\u001b[";
   private static final String RESET=CSI+"0m";
@@ -25,7 +27,7 @@ public class Console
       System.out.println(RESET);
     }
     System.out.println();
-    System.out.println(del(" deleted ")+ins("  inserted ")+chg(" changed "));
+    System.out.println(cpy(" copy")+del(" deleted ")+ins("  inserted ")+chg(" changed "));
     System.out.println();
     System.out.println("\'"+del("a")+ins("b")+"'");
 

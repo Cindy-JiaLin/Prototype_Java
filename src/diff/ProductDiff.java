@@ -16,7 +16,9 @@ import dcprototype.*;
 public class ProductDiff extends Diff 
 { private final TypeProduct a, b;
   private PartialSolution[] candidates;
-  
+  public TypeT getSourceValue(){ return this.a;}
+  public TypeT getTargetValue(){ return this.b;}
+ 
   public ProductDiff(TypeProduct a, TypeProduct b)
   { // These two product values must have the same size
     if(a.size()!=b.size()) 

@@ -23,7 +23,9 @@ public class ListDiff extends Diff
     this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
-   
+  public TypeT getSourceValue(){ return this.a;}
+  public TypeT getTargetValue(){ return this.b;}
+ 
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}
   public Sim getSim(){ return this.candidates[0].getSim();}  

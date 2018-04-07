@@ -7,6 +7,7 @@ import dcprototype.Main;
 import dcprototype.Options;
 
 import type.TYPE;
+import value.TypeT;
 import value.PrimString;
 
 public class PrimStringDiff extends Diff 
@@ -17,6 +18,8 @@ public class PrimStringDiff extends Diff
   { this.a=a; this.b=b;
     this.candidates = new PartialSolution[] { new PartialSolution(null)};
   }        
+  public TypeT getSourceValue(){ return this.a;}
+  public TypeT getTargetValue(){ return this.b;}
  
   public String toString(){ return this.candidates[0].toString();}
   public String html(){ return this.candidates[0].html();}

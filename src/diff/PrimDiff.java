@@ -19,15 +19,17 @@ import java.util.ArrayList;
 // Diff between PrimUnit, PrimBool, PrimChar, PrimNat, PrimInt
 public class PrimDiff extends Diff 
 { private final TypeT a, b;
-
   public PrimDiff(TypeT a, TypeT b)
   { this.a=a; this.b=b;}  
+
+  public TypeT getSourceValue(){ return this.a;}
+  public TypeT getTargetValue(){ return this.b;}
 
   public String getSolution(){ return toString();}
   public String toString()
   { TYPE t = this.a.typeOf();
     if(t.isPRIMITIVE())
-    { if(this.a.equals(this.b)) return ""+this.a;
+    { if(this.a.equals(this.b)) return Console.cpy(""+this.a);
       else return Console.del(""+this.a)+Console.ins(""+this.b);
     }
     else if(t.isREAL())
