@@ -108,12 +108,18 @@ public class Main
           System.out.println(diff.getSim().getPercentage());
       }
       else if(resTYPE.isLIST())
-      { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
-        for(; !diff.refine(); );
-        if(!(VERBOSE) && (DIFF)) 
-           System.out.println(diff.getSolution());
-        if(SIM) 
-          System.out.println(diff.getSim().getPercentage());
+      { TypeList list1 = (TypeList)resV1;
+        TypeList list2 = (TypeList)resV2;
+        if(list1.isEmptyList()&&list2.isEmptyList())
+          System.out.println(Console.cpy(""+list1));
+        else
+        { ListDiff diff = new ListDiff(list1, list2);
+          for(; !diff.refine(); );
+          if(!(VERBOSE) && (DIFF)) 
+            System.out.println(diff.getSolution());
+          if(SIM) 
+            System.out.println(diff.getSim().getPercentage());
+        }
       }
       else if(resTYPE.isSET())
       { TypeSet set1 = (TypeSet)resV1;
@@ -121,7 +127,7 @@ public class Main
         if(set1.isEmptySet()&&set2.isEmptySet())
           System.out.println(Console.cpy(""+set1));
         else
-        { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
+        { SetDiff diff = new SetDiff(set1, set2);
           for(; !diff.refine(); );
           if(!(VERBOSE) && (DIFF)) 
              System.out.println(diff.getSolution());

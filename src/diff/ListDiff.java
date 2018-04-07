@@ -401,13 +401,19 @@ public class ListDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { ListDiff diff = new ListDiff((TypeList)resV1, (TypeList)resV2);
-      for(; !diff.refine(); );
-      if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-      System.out.println(diff.getSolution());
-      if(HTMLCODE) writeHTML(diff.getSolution());
-      if(Main.SIM||SIM) 
-      System.out.println(diff.getSim().getPercentage());    
+    { TypeList list1 = (TypeList)resV1;
+      TypeList list2 = (TypeList)resV2;
+      if(list1.isEmptyList()&&list2.isEmptyList())
+        System.out.println(Console.cpy(""+list1));
+      else
+      { ListDiff diff = new ListDiff(list1, list2);
+        for(; !diff.refine(); );
+        if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
+        System.out.println(diff.getSolution());
+        if(HTMLCODE) writeHTML(diff.getSolution());
+        if(Main.SIM||SIM) 
+        System.out.println(diff.getSim().getPercentage());
+      }    
     }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;

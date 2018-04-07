@@ -474,13 +474,19 @@ public class SetDiff extends Diff
       System.out.println("TARGET:"); System.out.println(resV2);
     }    
     if(source!=null && target!=null)
-    { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
-      for(; !diff.refine(); );
-      if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
-      System.out.println(diff.getSolution());
-      if(HTMLCODE) writeHTML(diff.getSolution());
-      if(Main.SIM||SIM) 
-      System.out.println(diff.getSim().getPercentage());    
+    { TypeSet set1 = (TypeSet)resV1;
+      TypeSet set2 = (TypeSet)resV2;
+      if(set1.isEmptySet()&&set2.isEmptySet())
+        System.out.println(Console.cpy(""+set1));
+      else
+      { SetDiff diff = new SetDiff(set1,set2);
+        for(; !diff.refine(); );
+        if(!(Main.VERBOSE||VERBOSE) && (Main.DIFF||DIFF)) 
+          System.out.println(diff.getSolution());
+        if(HTMLCODE) writeHTML(diff.getSolution());
+        if(Main.SIM||SIM) 
+          System.out.println(diff.getSim().getPercentage());  
+      }  
     }
     final long endTime   = System.currentTimeMillis();
     final long totalTime = (endTime - startTime)/1000;
