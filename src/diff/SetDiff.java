@@ -108,7 +108,7 @@ public class SetDiff extends Diff
         res[i] = SetDiff.this.b.get(i);
       return res;
     }
-    public String toString(){ return "["+(trace == null ? "" : trace.toString())+"]"+getSim();}  
+    public String toString(){ return "{"+(trace == null ? "" : trace.toString())+"}"+getSim();}  
     public String html()
     { return HTML.TABLE(trace.html());}//+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
@@ -169,7 +169,7 @@ public class SetDiff extends Diff
         else return new PartialSolution[]{ delete(SetDiff.this.a.get(getSource()))};
       }
       else if(SetDiff.this.a.size() == getSource())
-      { if(!this.trace.getTargetValues().contains(SetDiff.this.b.get(getTarget()))) 
+      { if(trace==null||(!this.trace.getTargetValues().contains(SetDiff.this.b.get(getTarget())))) 
           return new PartialSolution[]{ insert(SetDiff.this.b.get(getTarget()))};
         else return new PartialSolution[0];
       }

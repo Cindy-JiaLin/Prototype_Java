@@ -116,12 +116,18 @@ public class Main
           System.out.println(diff.getSim().getPercentage());
       }
       else if(resTYPE.isSET())
-      { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
-        for(; !diff.refine(); );
-        if(!(VERBOSE) && (DIFF)) 
-           System.out.println(diff.getSolution());
-        if(SIM) 
-          System.out.println(diff.getSim().getPercentage());
+      { TypeSet set1 = (TypeSet)resV1;
+        TypeSet set2 = (TypeSet)resV2;
+        if(set1.isEmptySet()&&set2.isEmptySet())
+          System.out.println(Console.cpy(""+set1));
+        else
+        { SetDiff diff = new SetDiff((TypeSet)resV1, (TypeSet)resV2);
+          for(; !diff.refine(); );
+          if(!(VERBOSE) && (DIFF)) 
+             System.out.println(diff.getSolution());
+          if(SIM) 
+            System.out.println(diff.getSim().getPercentage());
+        }
       }
 
     }  
