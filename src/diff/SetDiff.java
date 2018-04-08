@@ -41,16 +41,11 @@ public class SetDiff extends Diff
         System.out.println(""+i+": "+this.candidates[i].getSim());
       System.out.println();
     }
-    // the initial state, the trace is null, outside refine is needed
     if(this.candidates[0].trace==null)
     { this.candidates = insertAll(this.candidates[0].expand(), this.deleteFirst(this.candidates));
       Arrays.sort(this.candidates, simComparator);
       return false;
     }
-    // the intermediate state, the trace is not null
-    // this.candidates[0].refine() is determined by the trace.refine()
-    // if the current EditOperation is Change, the trace.refine() return false
-    // which means one more inside refine step needs to do
     else if(!this.candidates[0].refine())
     { Arrays.sort(this.candidates, simComparator);// sort the candidates after each inside refine step
       return false;
@@ -77,19 +72,9 @@ public class SetDiff extends Diff
     return res;
   }
   private static PartialSolution[] insertAll(PartialSolution[] newCands, PartialSolution[] cands)
-  { int nonRedundant = 0;
-    // surpress redundant new candidates
-    for(int k = 0; k < newCands.length; k++)
-    { if(newCands[k].isRedundant(cands)) newCands[k]=null;
-      else nonRedundant++;
-    }
-    if(nonRedundant == 0) return cands;
-    PartialSolution[] res = new PartialSolution[cands.length+nonRedundant];
-    int j = 0;
-    for(int k =0; k < newCands.length; k++)
-      if(newCands[k]!=null) res[j++] = newCands[k];
-    for(int i=0; i < cands.length; i++)
-      res[j++] = cands[i];
+  { PartialSolution[] res = new PartialSolution[cands.length+newCands.length];
+    System.arraycopy(newCands, 0, res, 0, newCands.length);
+    System.arraycopy(cands, 0, res, newCands.length, cands.length);
     return res;
   }
  
@@ -101,7 +86,7 @@ public class SetDiff extends Diff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
 
-    public TypeT[] getTargetValues()
+    public TypeT[] getTargetValues()// get all values in set b
     { int size = SetDiff.this.b.size();
       TypeT[] res = new TypeT[size];
       for(int i=0; i<size; i++)
@@ -110,7 +95,9 @@ public class SetDiff extends Diff
     }
     public String toString(){ return "{"+(trace == null ? "" : trace.toString())+"}"+getSim();}  
     public String html()
-    { return HTML.TABLE(trace.html());}//+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    { return HTML.TABLE(HTML.TD(HTML.CHG, "{")+trace.html()+
+                        HTML.TD(HTML.CHG, "}")+
+                 (SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(SetDiff.this.a.weight()+
                                           SetDiff.this.b.weight()) : trace.getSim());}
@@ -126,43 +113,11 @@ public class SetDiff extends Diff
     { EditOperation op = new Insert(targetValue);
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
-    }        
+    } 
     public PartialSolution change(TypeT sourceValue, TypeT targetValue)
-    { EditOperation op;
-      Trace trace;
-      TYPE baseTYPE = a.getBaseTYPE();
-      if(baseTYPE.isUNIT()||baseTYPE.isBOOL()||baseTYPE.isCHAR()||baseTYPE.isNAT()||baseTYPE.isINT()) 
-      { op= new Change(new PrimDiff(sourceValue, targetValue)); 
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isSTRING())
-      { op= new Change(new PrimStringDiff((PrimString)sourceValue, (PrimString)targetValue));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isPRODUCT()) 
-      { op= new Change(new ProductDiff((TypeProduct)sourceValue, (TypeProduct)targetValue));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isUNION()) 
-      { op= new Change(new UnionDiff((TypeUnion)sourceValue, (TypeUnion)targetValue));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isLIST())
-      { op= new Change(new ListDiff((TypeList)sourceValue, (TypeList)targetValue));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else if(baseTYPE.isSET())
-      { op= new Change(new SetDiff((TypeSet)sourceValue, (TypeSet)targetValue));
-        trace = new Trace(this.trace, op);
-        return new PartialSolution(trace);
-      }
-      else throw new RuntimeException("More Types need to be explored.");
-    }        
+    {  TYPE baseTYPE = SetDiff.this.a.getBaseTYPE();
+       return new PartialSolution(new Trace(this.trace, new Change(newDiff(baseTYPE, sourceValue, targetValue)))); 
+    }       
     private PartialSolution[] expand()
     { if(SetDiff.this.b.size() ==  getTarget())
       { if(SetDiff.this.a.size() == getSource()) return new PartialSolution[0];
@@ -176,25 +131,25 @@ public class SetDiff extends Diff
       else// when both are non-empty
       { TypeT[] targets = getTargetValues();
         PartialSolution[] temp = new PartialSolution[2*targets.length+1];
+        int k=0;// k is the number of repeat insertion elements in b
         for(int i=0; i<targets.length; i++)
-        { temp[2*i]=change(SetDiff.this.a.get(getSource()), targets[i]);
-          //if(!this.trace.getTargetValues().contains(targets[i]))
+        { if(trace == null||(!trace.getTargetValues().contains(targets[i])))
+            temp[2*i]=change(SetDiff.this.a.get(getSource()), targets[i]);
+          else {temp[2*i]=null; k++;}
+          if(trace == null||(!trace.getTargetValues().contains(targets[i])))
             temp[2*i+1]=insert(targets[i]);
-          //else temp[2*i+1]=null;
+          else {temp[2*i+1]=null; k++;}
         }
         temp[2*targets.length]=delete(SetDiff.this.a.get(getSource()));
-        return temp;
-        /*
-        int n=0;
-        for(int i=0; i<temp.length; i++)
-        { if(temp[i]!=null) n++; else continue;}
-        if(n==0) return new PartialSolution[0];
-        PartialSolution[] res = new PartialSolution[n];
-        int j=0;
-        for(int i=0; i<temp.length; i++)
-        { if(temp[i]!=null) res[j++]=temp[i]; else continue;}
-        return res;
-        */
+        //return temp;
+        if(k==0) return temp;
+        else
+        { PartialSolution[] res = new PartialSolution[2*targets.length+1-k];
+          int n=0;
+          for(int i=0; i<temp.length; i++)
+            if(temp[i]!=null) res[n++]=temp[i];
+          return res;
+        }
       }
     }        
     
@@ -257,8 +212,8 @@ public class SetDiff extends Diff
       this.sim=this.op.calculate(trace==null ? SetDiff.this.getUnknown() : trace.getSim());
       return false;
     }
-
-    private ArrayList<TypeT> getTargetValues()
+    
+     private ArrayList<TypeT> getTargetValues()
     { if(trace == null)
       { ArrayList<TypeT> res = new ArrayList<>();
         if(op instanceof Insert) 
@@ -284,6 +239,7 @@ public class SetDiff extends Diff
         return res;
       }
     }
+
   }
  
   private abstract static class EditOperation
@@ -329,7 +285,7 @@ public class SetDiff extends Diff
   private final static class Copy extends EditOperation
   { private final TypeT c;
     public Copy(TypeT c){ this.c=c;}
-    public String toString(){ return ""+c;}
+    public String toString(){ return Console.cpy(""+c);}
     public String html(int ia, int ib)
     { return HTML.TD(HTML.CPY,ia)+
              HTML.TD(HTML.CPY,ib)+
@@ -448,7 +404,7 @@ public class SetDiff extends Diff
     else strTYPE = Options.getFileContentsAsString(typeFileName);
     List<String> lovs = new ArrayList<String>();
     TYPE resTYPE=ParseTYPEresult.parseTYPE(lovs, strTYPE).getResult();//parse TYPE
-    System.out.println("resTYPE: "+resTYPE);
+    System.out.println("TYPE: \n"+resTYPE);
     // parse the first value
     String source = null;
     // if sourceFileName is null get the first arg as source string to be compared
@@ -456,7 +412,7 @@ public class SetDiff extends Diff
     { source = Options.getFirst(args); args = Options.removeFirst(args);}
     else source = Options.getFileContentsAsString(sourceFileName);
     TypeT resV1=ParseVALUEresult.parseVALUE(resTYPE, source).getResult();//parse VALUE1 
-    System.out.println("resV1: "+resV1);
+    System.out.println("Value1: \n"+resV1);
     // parse the second value
     String target = null;
     // if targetFileName is null get the first arg as target string to be compared
@@ -464,7 +420,7 @@ public class SetDiff extends Diff
     { target = Options.getFirst(args); args = Options.removeFirst(args);}
     else target = Options.getFileContentsAsString(targetFileName);
     TypeT resV2=ParseVALUEresult.parseVALUE(resTYPE, target).getResult();//parse VALUE2
-    System.out.println("resV2: "+resV2);
+    System.out.println("Value2: \n"+resV2);
     // model values to be typed values
     TypeT model1 = Main.model(resTYPE, resV1);
     TypeT model2 = Main.model(resTYPE, resV2);

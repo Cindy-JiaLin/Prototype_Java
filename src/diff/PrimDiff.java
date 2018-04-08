@@ -24,7 +24,7 @@ public class PrimDiff extends Diff
 
   public TypeT getSourceValue(){ return this.a;}
   public TypeT getTargetValue(){ return this.b;}
-
+  public Sim getUnknown(){ return Sim.UNKNOWN(this.a.weight()+this.b.weight());}
   public String getSolution(){ return toString();}
   public String toString()
   { TYPE t = this.a.typeOf();

@@ -1,0 +1,15 @@
+# Example on page 113 Graph A
+{(node."Baile Átha Cliath",link.{(distance.165.6, node."Béal Feirste"), 
+                                 (distance.208.6, node."Gaillimh"), 
+                                 (distance.233.3, node."Doire"), 
+                                 (distance.255.3, node."Corcaigh")}), 
+ (node."Gaillimh",link.{(distance.208.6, node."Baile Átha Cliath"),
+                        (distance.204.0, node."Corcaigh")}), 
+ (node."Corcaigh",link.{(distance.204.0, node."Gaillimh"), 
+                        (distance.255.3, node."Baile Átha Cliath")}), 
+ (node."Béal Feirste",link.{(distance.113.0, node."Doire"), 
+                            (distance.165.6, node."Baile Átha Cliath")}), 
+ (node."Doire",link.{(distance.113.0, node."Béal Feirste"), 
+                     (distance.233.3, node."Baile Átha Cliath")})
+}
+

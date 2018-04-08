@@ -42,7 +42,7 @@ public class Main
     //System.out.println("strTYPE: "+strTYPE);
     List<String> lovs = new ArrayList<String>();
     TYPE resTYPE=ParseTYPEresult.parseTYPE(lovs, strTYPE).getResult();//parse TYPE
-    System.out.println("resTYPE: "+resTYPE);
+    System.out.println("resTYPE: \n"+resTYPE);
 
     String source = null;
     // if sourceFileName is null get the first arg as source string to be compared
@@ -53,7 +53,7 @@ public class Main
     else source = Options.getFileContentsAsString(sourceFileName);
     //System.out.println("source: "+source);
     TypeT resV1=ParseVALUEresult.parseVALUE(resTYPE, source).getResult();//parse VALUE1 
-    System.out.println("resV1: "+resV1);
+    System.out.println("resV1: \n"+resV1);
     
     String target = null;
     // if targetFileName is null get the first arg as target string to be compared
@@ -64,7 +64,7 @@ public class Main
     else target = Options.getFileContentsAsString(targetFileName);
     //System.out.println("target: "+target);
     TypeT resV2=ParseVALUEresult.parseVALUE(resTYPE, target).getResult();//parse VALUE2
-    System.out.println("resV2: "+resV2);
+    System.out.println("resV2: \n"+resV2);
 
     TypeT model1 = model(resTYPE, resV1);
     TypeT model2 = model(resTYPE, resV2);

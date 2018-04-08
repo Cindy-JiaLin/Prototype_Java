@@ -23,6 +23,7 @@ public class TypeSet extends TypeT
       for(int i=0; i<this.set.size(); i++)
       { buf.append(this.set.get(i));
         if(i<this.set.size()-1) buf.append(",");
+        if(this.set.get(i).weight()>1) buf.append("\n");
       }
       buf.append("}");
       return buf.toString();

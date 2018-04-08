@@ -85,10 +85,10 @@ public class PrimStringDiff extends Diff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}   
  
-    public String toString(){ return (trace == null ? "" : trace.toString());}
+    public String toString(){ return Console.cpy("\"")+(trace == null ? "" : trace.toString())+Console.cpy("\"");}
     //{ return "\""+(trace == null ? "" : trace.toString())+"?"+PrimStringDiff.this.a.substring(getSource())+"?"+PrimStringDiff.this.b.substring(getTarget())+"\""+getSim();}
     public String beautify(){ return (trace == null ? "" : trace.toString());}
-    public String html(){ return (trace == null ? "" : trace.html());}
+    public String html(){ return HTML.TABLE("\""+(trace == null ? "" : trace.html())+"\"");}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(PrimStringDiff.this.a.weight()+PrimStringDiff.this.b.weight()) : trace.getSim());}
 
@@ -103,7 +103,7 @@ public class PrimStringDiff extends Diff
       return new PartialSolution(trace);
     }        
     public PartialSolution copy()
-    { EditOperation op = new Copy(PrimStringDiff.this.b.charAt(getTarget()));
+    { EditOperation op = new Copy(PrimStringDiff.this.a.charAt(getSource()));
       Trace trace = new Trace(this.trace, op);
       return new PartialSolution(trace);
     }      
@@ -203,7 +203,7 @@ public class PrimStringDiff extends Diff
   private final static class Copy extends EditOperation
   { private final char c;
     public Copy(char c){ this.c=c;}
-    public String toString(){ return ""+c;}
+    public String toString(){ return Console.cpy(""+c);}
     public String html(){ return HTML.CPY(c);}
 
     public Sim calculate(Sim sim){ return sim.inc(2);}

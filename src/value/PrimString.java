@@ -8,7 +8,7 @@ public class PrimString extends TypeT
   { if(!T.equals(TYPE.STRING)) throw new RuntimeException("TypeString must be of TYPE.STRING.");
     this.str=str;
   }
-  public String toString(){return this.str;}    
+  public String toString(){return "\""+this.str+"\"";}    
   public boolean equals(Object obj)
   { if(obj instanceof PrimString)
     { PrimString that=(PrimString)obj; return this.str.equals(that.str);}

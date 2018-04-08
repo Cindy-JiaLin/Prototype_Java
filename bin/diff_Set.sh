@@ -19,10 +19,10 @@ java -cp lib dcprototype.Main -diff -sim -type testTYPE/SET/SET_CHAR.TYPE \{\'a\
 #----OK
 java -cp lib dcprototype.Main -diff -sim -type testTYPE/SET/SET_CHAR.TYPE \{\'a\',\'b\',\'d\'\} \{\'a\',\'c\'\}
 
-#---- ?????{=a-b-d+a-e}
-java -cp lib dcprototype.Main -verbose -diff -sim -type testTYPE/SET/SET_CHAR.TYPE \{\'a\',\'b\',\'d\',\'e\'\} \{\'a\',\'c\'\}
+#----OK 
+java -cp lib dcprototype.Main -diff -sim -type testTYPE/SET/SET_CHAR.TYPE \{\'a\',\'b\',\'d\',\'e\'\} \{\'a\',\'c\'\}
 
 
-#---- ?????{=a+a-b=d-e}
+#----OK 
 java -cp lib dcprototype.Main -diff -sim -type testTYPE/SET/SET_CHAR.TYPE -source testVALUE/Set/set_char_1.VALUE -target testVALUE/Set/set_char_2.VALUE 
 

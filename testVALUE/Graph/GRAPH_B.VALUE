@@ -1,0 +1,16 @@
+# Example on page 113 Graph B
+{(node."Dublin",link.{(distance.82.0, node."Dundalk"),
+                      (distance.233.3, node."Derry"),
+                      (distance.209.0, node."Galway"), 
+                      (distance.255.0, node."Cork")}),
+ (node."Dundalk",link.{(distance.82.0, node."Dublin"),
+                       (distance.85.0, node."Belfast")}),
+ (node."Galway",link.{(distance.204.0, node."Cork"), 
+                      (distance.209.0, node."Dublin")}),
+ (node."Cork",link.{(distance.204.0, node."Galway"), 
+                   (distance.255.0, node."Dublin")}),
+ (node."Belfast",link.{(distance.113.0, node."Derry"), 
+                       (distance.85.0, node."Dundalk")}),
+ (node."Derry",link.{(distance.113.0, node."Belfast"),
+                     (distance.233.3, node."Dublin")})
+}

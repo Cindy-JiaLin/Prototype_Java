@@ -105,10 +105,10 @@ public class TYPE
   // REAL TYPE is not in this method, since when compare REAL TYPE the acc needs to be considered.
   // For example in equals method
   // REAL is not in, since the accuracy needs to be compared in equals method
+  // STRING is not in, since when compute the Diff, the PrimStringDiff is discussed separately with PrimDiff
   public boolean isPRIMITIVE(){ return this.name.equals(sUNIT)
                                      ||this.name.equals(sBOOL)
                                      ||this.name.equals(sCHAR)
-                                     ||this.name.equals(sSTRING)
                                      ||this.name.equals(sNAT)
                                      ||this.name.equals(sINT);
                               }
@@ -213,6 +213,7 @@ public class TYPE
   { if (obj instanceof TYPE)
     { TYPE that=(TYPE)obj;
       if(this.isPRIMITIVE()&&that.isPRIMITIVE()){ return this.name.equals(that.name);}
+      else if(this.isSTRING()&&that.isSTRING()){ return this.name.equals(that.name);}
       else if(this.isREAL()&&that.isREAL()){ return Math.abs(this.acc-that.acc)<1.0e-6;}
       //For Structured TYPEs, if they are the same TYPE, 
       //the name of them should be equals to each other.
@@ -243,6 +244,7 @@ public class TYPE
   
   public String toString()
   { if(isPRIMITIVE()){ return this.name;}
+    else if(isSTRING()){ return this.name;}
     else if(isREAL()){ return this.name+"("+acc+")";}
     else if(isPRODUCT())
     { StringBuffer buf = new StringBuffer();
@@ -278,6 +280,7 @@ public class TYPE
   //or it is a free variable, i.e. this.varName!=varName&&this.T1.contains(varName)
   public boolean contains(String varName)
   { if(isPRIMITIVE()){ return false;}
+    else if(isSTRING()){ return false;}
     else if(isREAL()){ return false;}
     else if(isPRODUCT()||isUNION())
     { for(int i=0; i<this.TYPEs.size(); i++)
@@ -350,7 +353,7 @@ public class TYPE
     else{ throw new RuntimeException("Currently, there is only these recursive constructor.");}    
   }        
   public static TYPE unfold(TYPE T)
-  { if(T.isVAR()||T.isPRIMITIVE()||T.isREAL()){ return T;}
+  { if(T.isVAR()||T.isPRIMITIVE()||T.isSTRING()||T.isREAL()){ return T;}
     else if(T.isPRODUCT())
     { List<TYPE> newTYPEs=new ArrayList<TYPE>();
       for(int i=0; i<T.getTYPEs().size(); i++)

@@ -103,9 +103,10 @@ public class ProductDiff extends Diff
     public int getSource(){ return (this.trace == null ? 0 : trace.ia);}
     public int getTarget(){ return (this.trace == null ? 0 : trace.ib);}
  
-    public String toString(){ return "("+(trace == null ? "" : trace.toString())+")";}  
+    public String toString()
+    { return Console.chg("(")+(trace == null ? "" : trace.toString())+Console.chg(")");}  
     public String html()
-    { return HTML.TR("("+trace.html()+")"+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
+    { return HTML.TABLE(HTML.TD(HTML.CHG, "(")+trace.html()+HTML.TD(HTML.CHG,")")+(SIM ? HTML.TD2(HTML.CHG,getSim().getPercentage()):""));}
     public Sim getSim()
     { return (trace == null ? Sim.UNKNOWN(ProductDiff.this.a.weight()+
                                           ProductDiff.this.b.weight()) : trace.getSim());}
@@ -131,7 +132,7 @@ public class ProductDiff extends Diff
     { EditOperation op;
       Trace trace;
       TYPE t = a.typeOf().getTYPEs().get(getSource());
-      if(t.isUNIT()||t.isBOOL()||t.isCHAR()||t.isNAT()||t.isINT()) 
+      if(t.isUNIT()||t.isBOOL()||t.isCHAR()||t.isNAT()||t.isINT()||t.isREAL()) 
       { op= new Change(new PrimDiff(ProductDiff.this.a.getValues().get(getSource()), 
                                     ProductDiff.this.b.getValues().get(getTarget())));
         trace = new Trace(this.trace, op);
@@ -161,6 +162,13 @@ public class ProductDiff extends Diff
         trace = new Trace(this.trace, op);
         return new PartialSolution(trace);
       }
+       else if(t.isSET())
+      { op= new Change(new SetDiff((TypeSet)ProductDiff.this.a.getValues().get(getSource()), 
+                                   (TypeSet)ProductDiff.this.b.getValues().get(getTarget())));
+        trace = new Trace(this.trace, op);
+        return new PartialSolution(trace);
+      }
+
       else throw new RuntimeException("More Types need to be explored.");
     }        
     private PartialSolution[] expand(){ return new PartialSolution[]{ change()};}      
@@ -215,11 +223,15 @@ public class ProductDiff extends Diff
     }        
     public String toString()
     { String label=ProductDiff.this.a.getLabels().get(ia-1);
-      return (this.trace ==  null ? "" : this.trace.toString())+(label.equals("nolabel") ? "" : label+".")+this.op+(ProductDiff.this.a.size()==ia ? "" : ",\n");
+      return (this.trace ==  null ? "" : this.trace.toString())+
+              Console.cpy(label.equals("nolabel") ? "" : label+".")+
+              this.op+(ProductDiff.this.a.size()==ia ? "" : Console.cpy(","));
     }
     public String html()
     { String label=ProductDiff.this.a.getLabels().get(ia-1);
-      return(this.trace != null ? this.trace.html() : "")+HTML.TR((label.equals("nolabel") ? "" : label+".")+op.html(ia,ib)+",");}
+      return (this.trace != null ? this.trace.html() : "")+
+             HTML.TR(HTML.TD(HTML.CPY, label.equals("nolabel") ? "" : label+".")+
+             op.html(ia,ib)+HTML.TD(HTML.CHG, ","));}
     public Sim getSim(){ return this.sim;}
 
     public boolean refine()
@@ -290,31 +302,32 @@ public class ProductDiff extends Diff
     { if(diff instanceof PrimDiff)
       { return //HTML.TD(HTML.CHG,ia)+
                //HTML.TD(HTML.CHG,ib)+
-        //(SIM ? HTML.TD(""+((PrimDiff)diff).getSim().getPercentage1()+" ") : "")+
+        (SIM ? HTML.TD(""+((PrimDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((PrimDiff)diff).html());
       }
       else if(diff instanceof PrimStringDiff)
-      { return //HTML.TD(HTML.CHG,ia)+
+      { PrimStringDiff primStringDiff=(PrimStringDiff)diff;
+        return //HTML.TD(HTML.CHG,ia)+
                //HTML.TD(HTML.CHG,ib)+
-        //(SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
-               HTML.TD(HTML.CHG, ((PrimStringDiff)diff).html());
+        (SIM ? HTML.TD(""+((PrimStringDiff)diff).getSim().getPercentage1()+" ") : "")+
+               HTML.TD((primStringDiff.getSim().isEqual()? HTML.CPY : HTML.CHG), primStringDiff.html());
       }
       else if(diff instanceof ProductDiff)
       { return //HTML.TD(HTML.CHG,ia)+
                //HTML.TD(HTML.CHG,ib)+
-        //(SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
+        (SIM ? HTML.TD(""+((ProductDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ProductDiff)diff).html());
       }
       else if(diff instanceof UnionDiff)
-      { return HTML.TD(HTML.CHG,ia)+
-               HTML.TD(HTML.CHG,ib)+
-        //(SIM ? HTML.TD(""+((UnionDiff)diff).getSim().getPercentage1()+" ") : "")+
+      { return //HTML.TD(HTML.CHG,ia)+
+               //HTML.TD(HTML.CHG,ib)+
+        (SIM ? HTML.TD(""+((UnionDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((UnionDiff)diff).html());
       }
       else if(diff instanceof ListDiff)
       { return //HTML.TD(HTML.CHG,ia)+
                //HTML.TD(HTML.CHG,ib)+
-        //(SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
+        (SIM ? HTML.TD(""+((ListDiff)diff).getSim().getPercentage1()+" ") : "")+
                HTML.TD(HTML.CHG, ((ListDiff)diff).html());
       }
       else throw new RuntimeException("Currently, there is no other diff.");
@@ -366,7 +379,7 @@ public class ProductDiff extends Diff
     else strTYPE = Options.getFileContentsAsString(typeFileName);
     List<String> lovs = new ArrayList<String>();
     TYPE resTYPE=ParseTYPEresult.parseTYPE(lovs, strTYPE).getResult();
-    System.out.println("resTYPE: "+resTYPE);
+    System.out.println("TYPE: \n"+resTYPE);
     // parse the first value
     String source = null;
     // if sourceFileName is null get the first arg as source string to be compared
@@ -374,7 +387,7 @@ public class ProductDiff extends Diff
     { source = Options.getFirst(args); args = Options.removeFirst(args);}
     else source = Options.getFileContentsAsString(sourceFileName);
     TypeT resV1=ParseVALUEresult.parseVALUE(resTYPE, source).getResult();
-    System.out.println("resV1: "+resV1);
+    System.out.println("Value1: \n"+resV1);
     // parse the second value
     String target = null;
     // if targetFileName is null get the first arg as target string to be compared
@@ -382,7 +395,7 @@ public class ProductDiff extends Diff
     { target = Options.getFirst(args); args = Options.removeFirst(args);}
     else target = Options.getFileContentsAsString(targetFileName);
     TypeT resV2=ParseVALUEresult.parseVALUE(resTYPE, target).getResult();
-    System.out.println("resV2: "+resV2);
+    System.out.println("Value2: \n"+resV2);
 
     TypeT model1 = Main.model(resTYPE, resV1);
     TypeT model2 = Main.model(resTYPE, resV2);
